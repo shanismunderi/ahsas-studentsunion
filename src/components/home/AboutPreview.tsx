@@ -3,33 +3,25 @@ import { ArrowRight, Target, Heart, Lightbulb, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import aboutImage from "@/assets/about-students.jpg";
-
-const values = [
-  {
-    icon: Target,
-    title: "Excellence",
-    description: "Striving for the highest standards in all endeavors",
-  },
-  {
-    icon: Heart,
-    title: "Community",
-    description: "Building lasting bonds and supporting each other",
-  },
-  {
-    icon: Lightbulb,
-    title: "Innovation",
-    description: "Embracing new ideas and creative solutions",
-  },
-  {
-    icon: Users,
-    title: "Leadership",
-    description: "Developing tomorrow's leaders today",
-  },
-];
-
+const values = [{
+  icon: Target,
+  title: "Excellence",
+  description: "Striving for the highest standards in all endeavors"
+}, {
+  icon: Heart,
+  title: "Community",
+  description: "Building lasting bonds and supporting each other"
+}, {
+  icon: Lightbulb,
+  title: "Innovation",
+  description: "Embracing new ideas and creative solutions"
+}, {
+  icon: Users,
+  title: "Leadership",
+  description: "Developing tomorrow's leaders today"
+}];
 export function AboutPreview() {
-  return (
-    <section className="py-24 bg-background relative overflow-hidden">
+  return <section className="py-24 bg-background relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-0 left-0 w-96 h-96 bg-primary rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
@@ -39,29 +31,33 @@ export function AboutPreview() {
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Image Side */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="relative"
-          >
+          <motion.div initial={{
+          opacity: 0,
+          x: -40
+        }} whileInView={{
+          opacity: 1,
+          x: 0
+        }} viewport={{
+          once: true
+        }} transition={{
+          duration: 0.6
+        }} className="relative">
             <div className="relative rounded-3xl overflow-hidden shadow-card-hover">
-              <img
-                src={aboutImage}
-                alt="Ahsas students community"
-                className="w-full h-[500px] object-cover"
-              />
+              <img alt="Ahsas students community" className="w-full h-[500px] object-cover" src="/lovable-uploads/c8289fc4-78f6-43b7-b2e5-947c434bbeda.png" />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent" />
             </div>
             {/* Floating Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="absolute -bottom-8 -right-8 bg-card rounded-2xl p-6 shadow-card-hover max-w-[260px]"
-            >
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{
+            delay: 0.3
+          }} className="absolute -bottom-8 -right-8 bg-card rounded-2xl p-6 shadow-card-hover max-w-[260px]">
               <div className="text-5xl font-bold text-primary">10+</div>
               <div className="text-muted-foreground mt-2">
                 Years of nurturing student excellence
@@ -70,12 +66,17 @@ export function AboutPreview() {
           </motion.div>
 
           {/* Content Side */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          x: 40
+        }} whileInView={{
+          opacity: 1,
+          x: 0
+        }} viewport={{
+          once: true
+        }} transition={{
+          duration: 0.6
+        }}>
             <span className="text-sm font-semibold text-accent uppercase tracking-wider">
               About Ahsas
             </span>
@@ -95,15 +96,17 @@ export function AboutPreview() {
 
             {/* Values Grid */}
             <div className="mt-10 grid grid-cols-2 gap-4">
-              {values.map((value, index) => (
-                <motion.div
-                  key={value.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 * index }}
-                  className="flex items-start gap-3"
-                >
+              {values.map((value, index) => <motion.div key={value.title} initial={{
+              opacity: 0,
+              y: 20
+            }} whileInView={{
+              opacity: 1,
+              y: 0
+            }} viewport={{
+              once: true
+            }} transition={{
+              delay: 0.1 * index
+            }} className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                     <value.icon className="w-5 h-5 text-accent" />
                   </div>
@@ -113,8 +116,7 @@ export function AboutPreview() {
                       {value.description}
                     </p>
                   </div>
-                </motion.div>
-              ))}
+                </motion.div>)}
             </div>
 
             <div className="mt-10">
@@ -128,6 +130,5 @@ export function AboutPreview() {
           </motion.div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 }
