@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { GraduationCap, Mail, Lock, ArrowRight, Eye, EyeOff, User } from "lucide-react";
+import { GraduationCap, Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -10,10 +10,9 @@ import { useAuth } from "@/hooks/useAuth";
 const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, isAdmin, signIn, signUp, isLoading } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
+  const { user, isAdmin, signIn, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ email: "", password: "", name: "" });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -26,26 +25,11 @@ const Login = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (isLogin) {
-      const { error } = await signIn(formData.email, formData.password);
-      if (error) {
-        toast({ title: "Login failed", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Welcome back!" });
-      }
+    const { error } = await signIn(formData.email, formData.password);
+    if (error) {
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
-      if (!formData.name.trim()) {
-        toast({ title: "Please enter your name", variant: "destructive" });
-        setIsSubmitting(false);
-        return;
-      }
-      const { error } = await signUp(formData.email, formData.password, formData.name);
-      if (error) {
-        toast({ title: "Signup failed", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Account created!", description: "You can now sign in." });
-        setIsLogin(true);
-      }
+      toast({ title: "Welcome back!" });
     }
     setIsSubmitting(false);
   };
@@ -65,36 +49,20 @@ const Login = () => {
           </Link>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground">{isLogin ? "Welcome Back" : "Join Ahsas"}</h1>
+            <h1 className="text-3xl font-bold text-foreground">Member Login</h1>
             <p className="mt-2 text-muted-foreground">
-              {isLogin ? "Sign in to access your dashboard" : "Create your account to become a member"}
+              Sign in with credentials provided by admin
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    placeholder="Enter your full name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required={!isLogin}
-                    className="h-12 pl-12"
-                  />
-                </div>
-              </div>
-            )}
-
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="your.email@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
@@ -122,16 +90,15 @@ const Login = () => {
             </div>
 
             <Button type="submit" variant="gold" size="lg" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? "Please wait..." : <>{isLogin ? "Sign In" : "Create Account"} <ArrowRight className="w-4 h-4" /></>}
+              {isSubmitting ? "Signing in..." : <>Sign In <ArrowRight className="w-4 h-4" /></>}
             </Button>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-muted-foreground">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}
-              <button onClick={() => setIsLogin(!isLogin)} className="ml-2 text-accent font-semibold hover:underline">
-                {isLogin ? "Sign Up" : "Sign In"}
-              </button>
+          <div className="mt-8 p-4 rounded-xl bg-muted/50 border border-border">
+            <p className="text-sm text-muted-foreground text-center">
+              <span className="font-medium text-foreground">Don't have an account?</span>
+              <br />
+              Contact your administrator to get your login credentials.
             </p>
           </div>
 
