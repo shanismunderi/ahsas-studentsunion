@@ -1,91 +1,35 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
-
-const categories = ["All", "Events", "Workshops", "Community", "Sports"];
-
-const galleryImages = [
-  {
-    id: 1,
-    src: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop",
-    title: "Cultural Festival 2023",
-    category: "Events",
-  },
-  {
-    id: 2,
-    src: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=400&fit=crop",
-    title: "Leadership Workshop",
-    category: "Workshops",
-  },
-  {
-    id: 3,
-    src: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600&h=400&fit=crop",
-    title: "Community Service Day",
-    category: "Community",
-  },
-  {
-    id: 4,
-    src: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=400&fit=crop",
-    title: "Team Building Event",
-    category: "Events",
-  },
-  {
-    id: 5,
-    src: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&h=400&fit=crop",
-    title: "Annual Meeting 2023",
-    category: "Events",
-  },
-  {
-    id: 6,
-    src: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=400&fit=crop",
-    title: "Sports Tournament",
-    category: "Sports",
-  },
-  {
-    id: 7,
-    src: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&h=400&fit=crop",
-    title: "New Member Orientation",
-    category: "Events",
-  },
-  {
-    id: 8,
-    src: "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600&h=400&fit=crop",
-    title: "Volunteer Program",
-    category: "Community",
-  },
-  {
-    id: 9,
-    src: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop",
-    title: "Skill Development Session",
-    category: "Workshops",
-  },
-  {
-    id: 10,
-    src: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&h=400&fit=crop",
-    title: "Study Group Session",
-    category: "Events",
-  },
-  {
-    id: 11,
-    src: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=400&fit=crop",
-    title: "Cricket Match",
-    category: "Sports",
-  },
-  {
-    id: 12,
-    src: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600&h=400&fit=crop",
-    title: "Family Day Celebration",
-    category: "Community",
-  },
-];
+import { X, ChevronLeft, ChevronRight, Loader2, ImageIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Gallery = () => {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const { data: galleryImages = [], isLoading } = useQuery({
+    queryKey: ["public-gallery"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Extract unique categories from gallery images
+  const categories = useMemo(() => {
+    const tags = new Set(galleryImages.map((img) => img.event_tag).filter(Boolean));
+    return ["All", ...Array.from(tags)] as string[];
+  }, [galleryImages]);
 
   const filteredImages = galleryImages.filter(
-    (img) => activeCategory === "All" || img.category === activeCategory
+    (img) => activeCategory === "All" || img.event_tag === activeCategory
   );
 
   const handlePrev = () => {
@@ -111,7 +55,8 @@ const Gallery = () => {
       {/* Hero Section */}
       <section className="pt-32 pb-20 gradient-hero relative overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 right-10 w-64 h-64 bg-accent/20 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 right-10 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-pulse-slow" />
+          <div className="absolute bottom-1/4 left-20 w-48 h-48 bg-primary/30 rounded-full blur-3xl animate-float" />
         </div>
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <motion.div
@@ -133,52 +78,76 @@ const Gallery = () => {
       </section>
 
       {/* Category Filter */}
-      <section className="py-8 bg-background border-b border-border sticky top-20 z-40">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  activeCategory === category
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+      {categories.length > 1 && (
+        <section className="py-8 bg-background border-b border-border sticky top-20 z-40">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="flex flex-wrap justify-center gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeCategory === category
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Gallery Grid */}
-      <section className="py-16 bg-muted/50">
+      <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredImages.map((image, index) => (
-              <motion.div
-                key={image.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
-                className="group relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer"
-                onClick={() => setSelectedImage(image.id)}
-              >
-                <img
-                  src={image.src}
-                  alt={image.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <h3 className="text-sm font-semibold text-primary-foreground">{image.title}</h3>
-                  <span className="text-xs text-primary-foreground/70">{image.category}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : filteredImages.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredImages.map((image, index) => (
+                <motion.div
+                  key={image.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer border border-border/50 bg-card"
+                  onClick={() => setSelectedImage(image.id)}
+                >
+                  <img
+                    src={image.image_url}
+                    alt={image.caption || "Gallery image"}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    {image.caption && (
+                      <h3 className="text-sm font-semibold text-foreground">{image.caption}</h3>
+                    )}
+                    {image.event_tag && (
+                      <span className="text-xs text-accent">{image.event_tag}</span>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20"
+            >
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
+                <ImageIcon className="w-12 h-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-2xl font-semibold text-foreground mb-2">No images yet</h3>
+              <p className="text-muted-foreground">Check back soon for photos from our events!</p>
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -189,12 +158,12 @@ const Gallery = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-primary/95 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-background/95 backdrop-blur-lg flex items-center justify-center p-4"
             onClick={() => setSelectedImage(null)}
           >
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute top-6 right-6 w-12 h-12 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center text-primary-foreground transition-colors"
+              className="absolute top-6 right-6 w-12 h-12 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground transition-colors z-10"
             >
               <X className="w-6 h-6" />
             </button>
@@ -203,7 +172,7 @@ const Gallery = () => {
                 e.stopPropagation();
                 handlePrev();
               }}
-              className="absolute left-6 w-12 h-12 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center text-primary-foreground transition-colors"
+              className="absolute left-6 w-12 h-12 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground transition-colors z-10"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
@@ -212,7 +181,7 @@ const Gallery = () => {
                 e.stopPropagation();
                 handleNext();
               }}
-              className="absolute right-6 w-12 h-12 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center text-primary-foreground transition-colors"
+              className="absolute right-6 w-12 h-12 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground transition-colors z-10"
             >
               <ChevronRight className="w-6 h-6" />
             </button>
@@ -220,18 +189,24 @@ const Gallery = () => {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="max-w-5xl max-h-[85vh] rounded-2xl overflow-hidden"
+              className="relative max-w-5xl max-h-[85vh] rounded-2xl overflow-hidden shadow-card-hover"
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={selectedImageData.src.replace("w=600&h=400", "w=1200&h=800")}
-                alt={selectedImageData.title}
+                src={selectedImageData.image_url}
+                alt={selectedImageData.caption || "Gallery image"}
                 className="w-full h-full object-contain"
               />
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-primary to-transparent">
-                <h3 className="text-xl font-bold text-primary-foreground">{selectedImageData.title}</h3>
-                <span className="text-sm text-accent">{selectedImageData.category}</span>
-              </div>
+              {(selectedImageData.caption || selectedImageData.event_tag) && (
+                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background to-transparent">
+                  {selectedImageData.caption && (
+                    <h3 className="text-xl font-bold text-foreground">{selectedImageData.caption}</h3>
+                  )}
+                  {selectedImageData.event_tag && (
+                    <span className="text-sm text-accent">{selectedImageData.event_tag}</span>
+                  )}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

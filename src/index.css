@@ -73,36 +73,55 @@
   }
 
   .dark {
-    --background: 220 40% 8%;
-    --foreground: 220 20% 95%;
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
 
-    --card: 220 40% 12%;
-    --card-foreground: 220 20% 95%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 220 40% 12%;
-    --popover-foreground: 220 20% 95%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 42 95% 55%;
-    --primary-foreground: 220 60% 10%;
+    --primary: 45 93% 58%;
+    --primary-foreground: 222 47% 8%;
 
-    --secondary: 220 40% 18%;
-    --secondary-foreground: 220 20% 90%;
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 95%;
 
-    --muted: 220 40% 15%;
-    --muted-foreground: 220 20% 60%;
+    --muted: 217 33% 12%;
+    --muted-foreground: 215 20% 60%;
 
-    --accent: 42 95% 55%;
-    --accent-foreground: 220 60% 10%;
+    --accent: 45 93% 58%;
+    --accent-foreground: 222 47% 8%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 62% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 40% 20%;
-    --input: 220 40% 20%;
-    --ring: 42 95% 55%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 45 93% 58%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(220 60% 8%) 0%, hsl(220 50% 15%) 50%, hsl(180 45% 20%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+    /* Enhanced dark gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(220 50% 12%) 50%, hsl(200 50% 15%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(222 47% 11%) 0%, hsl(222 47% 8%) 100%);
+
+    /* Dark mode shadows with subtle glow */
+    --shadow-sm: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 8px 24px -8px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 16px 48px -16px hsl(0 0% 0% / 0.5);
+    --shadow-gold: 0 8px 32px -8px hsl(45 93% 58% / 0.25);
+    --shadow-glow: 0 0 60px hsl(45 93% 58% / 0.15);
+
+    /* Dark sidebar */
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 45 93% 58%;
+    --sidebar-primary-foreground: 222 47% 8%;
+    --sidebar-accent: 217 33% 14%;
+    --sidebar-accent-foreground: 210 40% 90%;
+    --sidebar-border: 217 33% 18%;
+    --sidebar-ring: 45 93% 58%;
   }
 }
 
@@ -155,6 +174,7 @@
     box-shadow: var(--shadow-gold);
   }
 
+  /* Animation utilities */
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
@@ -165,6 +185,24 @@
 
   .animate-shimmer {
     animation: shimmer 2s linear infinite;
+  }
+
+  /* Glow effects for dark mode */
+  .glow-accent {
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.3), 0 0 40px hsl(var(--accent) / 0.1);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3), 0 0 40px hsl(var(--primary) / 0.1);
+  }
+
+  /* Dark mode card enhancement */
+  .dark .card-glow {
+    box-shadow: 0 0 0 1px hsl(var(--border)), 0 8px 24px -8px hsl(0 0% 0% / 0.5);
+  }
+
+  .dark .card-glow:hover {
+    box-shadow: 0 0 0 1px hsl(var(--accent) / 0.3), 0 8px 32px -8px hsl(var(--accent) / 0.2);
   }
 }
 

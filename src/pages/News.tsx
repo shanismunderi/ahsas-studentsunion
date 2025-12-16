@@ -1,80 +1,51 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { Calendar, MapPin, Clock, ArrowRight, Search } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowRight, Search, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
-const categories = ["All", "Events", "News", "Announcements"];
-
-const posts = [
-  {
-    id: 1,
-    title: "Annual Cultural Festival 2024",
-    excerpt: "Join us for the biggest celebration of the year featuring performances, competitions, and more.",
-    date: "March 15, 2024",
-    time: "10:00 AM",
-    location: "Main Auditorium",
-    category: "Events",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=500&fit=crop",
-  },
-  {
-    id: 2,
-    title: "Leadership Summit 2024",
-    excerpt: "A transformative workshop designed to develop leadership skills and strategic thinking.",
-    date: "April 5, 2024",
-    time: "9:00 AM",
-    location: "Conference Hall",
-    category: "Events",
-    image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&h=500&fit=crop",
-  },
-  {
-    id: 3,
-    title: "New Scholarship Program Announced",
-    excerpt: "Ahsas introduces merit-based scholarships for outstanding student members.",
-    date: "March 1, 2024",
-    category: "News",
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=500&fit=crop",
-  },
-  {
-    id: 4,
-    title: "Community Service Day",
-    excerpt: "Join fellow members in giving back to our local community through various service activities.",
-    date: "April 20, 2024",
-    time: "8:00 AM",
-    location: "City Center",
-    category: "Events",
-    image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&h=500&fit=crop",
-  },
-  {
-    id: 5,
-    title: "Member Registration Open",
-    excerpt: "Applications are now open for new members. Don't miss this opportunity to join our family.",
-    date: "February 20, 2024",
-    category: "Announcements",
-    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=500&fit=crop",
-  },
-  {
-    id: 6,
-    title: "Sports Tournament Results",
-    excerpt: "Congratulations to all participants in our annual inter-department sports tournament.",
-    date: "February 15, 2024",
-    category: "News",
-    image: "https://images.unsplash.com/photo-1461896836934- voices?w=800&h=500&fit=crop",
-  },
-];
+const categories = ["All", "event", "news", "announcement"];
 
 const News = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ["public-posts", "news-events"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("is_published", true)
+        .in("post_type", ["event", "news", "announcement"])
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const filteredPosts = posts.filter((post) => {
-    const matchesCategory = activeCategory === "All" || post.category === activeCategory;
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeCategory === "All" || post.post_type === activeCategory;
+    const matchesSearch = 
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const getCategoryLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      event: "Events",
+      news: "News",
+      announcement: "Announcements",
+    };
+    return labels[type] || type;
+  };
 
   return (
     <PublicLayout>
@@ -82,6 +53,7 @@ const News = () => {
       <section className="pt-32 pb-20 gradient-hero relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-accent/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 left-10 w-48 h-48 bg-primary/30 rounded-full blur-3xl" />
         </div>
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <motion.div
@@ -114,11 +86,11 @@ const News = () => {
                   onClick={() => setActiveCategory(category)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     activeCategory === category
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                   }`}
                 >
-                  {category}
+                  {category === "All" ? "All" : getCategoryLabel(category)}
                 </button>
               ))}
             </div>
@@ -128,7 +100,7 @@ const News = () => {
                 placeholder="Search posts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-full md:w-64"
+                className="pl-10 w-full md:w-64 bg-background"
               />
             </div>
           </div>
@@ -136,9 +108,13 @@ const News = () => {
       </section>
 
       {/* Posts Grid */}
-      <section className="py-16 bg-muted/50">
+      <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4 lg:px-8">
-          {filteredPosts.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : filteredPosts.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post, index) => (
                 <motion.article
@@ -146,17 +122,23 @@ const News = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300"
+                  className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 border border-border/50"
                 >
-                  <div className="relative h-52 overflow-hidden">
-                    <img
-                      src={post.image}
-                      alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                  <div className="relative h-52 overflow-hidden bg-muted">
+                    {post.cover_image_url ? (
+                      <img
+                        src={post.cover_image_url}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+                        <Calendar className="w-16 h-16 text-muted-foreground/40" />
+                      </div>
+                    )}
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1 rounded-full text-xs font-semibold bg-accent text-accent-foreground">
-                        {post.category}
+                        {getCategoryLabel(post.post_type)}
                       </span>
                     </div>
                   </div>
@@ -164,22 +146,18 @@ const News = () => {
                     <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
                       {post.title}
                     </h3>
-                    <p className="mt-3 text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                    {post.subtitle && (
+                      <p className="mt-2 text-muted-foreground line-clamp-2">{post.subtitle}</p>
+                    )}
                     <div className="mt-4 space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="w-4 h-4 text-accent" />
-                        {post.date}
+                        {format(new Date(post.created_at), "MMM dd, yyyy")}
                       </div>
-                      {post.time && (
+                      {post.event_date && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Clock className="w-4 h-4 text-accent" />
-                          {post.time}
-                        </div>
-                      )}
-                      {post.location && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4 text-accent" />
-                          {post.location}
+                          Event: {format(new Date(post.event_date), "MMM dd, yyyy")}
                         </div>
                       )}
                     </div>
@@ -197,19 +175,30 @@ const News = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <p className="text-xl text-muted-foreground">No posts found matching your criteria.</p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => {
-                  setActiveCategory("All");
-                  setSearchQuery("");
-                }}
-              >
-                Clear Filters
-              </Button>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20"
+            >
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
+                <Calendar className="w-12 h-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-2xl font-semibold text-foreground mb-2">No posts found</h3>
+              <p className="text-muted-foreground mb-6">
+                {searchQuery ? "Try adjusting your search terms" : "Check back soon for updates!"}
+              </p>
+              {(searchQuery || activeCategory !== "All") && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setActiveCategory("All");
+                    setSearchQuery("");
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </motion.div>
           )}
         </div>
       </section>
