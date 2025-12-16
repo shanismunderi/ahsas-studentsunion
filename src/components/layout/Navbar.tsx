@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { SignOutDialog } from "@/components/SignOutDialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -136,7 +137,7 @@ export function Navbar() {
             </div>
 
             {/* CTA Buttons / User Menu */}
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-2">
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -200,6 +201,7 @@ export function Navbar() {
                   </Link>
                 </>
               )}
+              <ThemeToggle />
             </div>
 
             {/* Mobile Menu Button */}
@@ -240,6 +242,10 @@ export function Navbar() {
                       {link.name}
                     </Link>
                   ))}
+                  <div className="flex items-center justify-between px-4 py-2">
+                    <span className="text-sm text-muted-foreground">Theme</span>
+                    <ThemeToggle />
+                  </div>
                   <div className="pt-4 space-y-2 border-t border-border mt-4">
                     {user ? (
                       <>
