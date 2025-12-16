@@ -99,20 +99,20 @@ export function Navbar() {
         )}
       >
         <nav className="container mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
               <div className="relative">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-card group-hover:shadow-gold transition-shadow duration-300">
-                  <GraduationCap className="w-7 h-7 text-accent" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary flex items-center justify-center shadow-card group-hover:shadow-gold transition-shadow duration-300">
+                  <GraduationCap className="w-5 h-5 sm:w-7 sm:h-7 text-accent" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-accent shadow-gold" />
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-accent shadow-gold" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-foreground tracking-tight">
+                <span className="text-lg sm:text-xl font-bold text-foreground tracking-tight">
                   Ahsas
                 </span>
-                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
+                <span className="text-[8px] sm:text-[10px] text-muted-foreground font-medium uppercase tracking-widest hidden xs:block">
                   AL HASANATH STUDENTS ASSOCIATION
                 </span>
               </div>
@@ -227,7 +227,7 @@ export function Navbar() {
                 transition={{ duration: 0.2 }}
                 className="lg:hidden overflow-hidden"
               >
-                <div className="py-4 space-y-2 border-t border-border">
+                <div className="py-4 space-y-1 border-t border-border bg-background/95 backdrop-blur-xl max-h-[calc(100vh-5rem)] overflow-y-auto">
                   {navLinks.map((link) => (
                     <Link
                       key={link.href}
@@ -242,49 +242,49 @@ export function Navbar() {
                       {link.name}
                     </Link>
                   ))}
-                  <div className="flex items-center justify-between px-4 py-2">
+                  <div className="flex items-center justify-between px-4 py-3">
                     <span className="text-sm text-muted-foreground">Theme</span>
                     <ThemeToggle />
                   </div>
-                  <div className="pt-4 space-y-2 border-t border-border mt-4">
+                  <div className="pt-3 space-y-2 border-t border-border mt-2 px-4">
                     {user ? (
                       <>
-                        <div className="flex items-center gap-3 px-4 py-2">
-                          <Avatar className="w-10 h-10">
+                        <div className="flex items-center gap-3 py-3">
+                          <Avatar className="w-10 h-10 flex-shrink-0">
                             <AvatarImage src={profile?.profile_photo_url || ""} />
-                            <AvatarFallback className="bg-primary text-primary-foreground">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                               {getInitials(profile?.full_name)}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <p className="font-medium text-sm">{profile?.full_name}</p>
-                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-sm truncate">{profile?.full_name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                           </div>
                         </div>
                         <Link to={dashboardLink} className="block">
-                          <Button variant="outline" className="w-full justify-start">
-                            <LayoutDashboard className="w-4 h-4 mr-2" />
-                            {isAdmin ? "Admin Dashboard" : "My Dashboard"}
+                          <Button variant="outline" className="w-full justify-start h-11">
+                            <LayoutDashboard className="w-4 h-4 mr-2 flex-shrink-0" />
+                            <span className="truncate">{isAdmin ? "Admin Dashboard" : "My Dashboard"}</span>
                           </Button>
                         </Link>
                         <Button
                           variant="destructive"
-                          className="w-full"
+                          className="w-full h-11"
                           onClick={() => setShowSignOutDialog(true)}
                         >
-                          <LogOut className="w-4 h-4 mr-2" />
+                          <LogOut className="w-4 h-4 mr-2 flex-shrink-0" />
                           Sign Out
                         </Button>
                       </>
                     ) : (
                       <>
                         <Link to="/login" className="block">
-                          <Button variant="outline" className="w-full">
+                          <Button variant="outline" className="w-full h-11">
                             Member Login
                           </Button>
                         </Link>
                         <Link to="/login" className="block">
-                          <Button variant="gold" className="w-full">
+                          <Button variant="gold" className="w-full h-11">
                             Join Ahsas
                           </Button>
                         </Link>
