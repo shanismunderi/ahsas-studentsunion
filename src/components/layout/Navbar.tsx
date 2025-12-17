@@ -98,22 +98,22 @@ export function Navbar() {
             : "bg-transparent"
         )}
       >
-        <nav className="container mx-auto px-4 lg:px-8">
+        <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
               <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary flex items-center justify-center shadow-card group-hover:shadow-gold transition-shadow duration-300">
-                  <GraduationCap className="w-5 h-5 sm:w-7 sm:h-7 text-accent" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-primary flex items-center justify-center shadow-card group-hover:shadow-gold transition-shadow duration-300">
+                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-accent" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-accent shadow-gold" />
+                <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 rounded-full bg-accent shadow-gold" />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg sm:text-xl font-bold text-foreground tracking-tight">
+                <span className="text-base sm:text-lg lg:text-xl font-bold text-foreground tracking-tight">
                   Ahsas
                 </span>
-                <span className="text-[8px] sm:text-[10px] text-muted-foreground font-medium uppercase tracking-widest hidden xs:block">
-                  AL HASANATH STUDENTS ASSOCIATION
+                <span className="text-[7px] sm:text-[8px] lg:text-[10px] text-muted-foreground font-medium uppercase tracking-widest hidden sm:block max-w-[120px] sm:max-w-none truncate">
+                  AL HASANATH STUDENTS
                 </span>
               </div>
             </Link>
