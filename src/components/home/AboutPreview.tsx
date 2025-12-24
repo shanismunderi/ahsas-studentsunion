@@ -1,123 +1,191 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Target, Heart, Lightbulb, Users } from "lucide-react";
+import { ChevronDown, ChevronUp, ArrowRight, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import aboutImage from "@/assets/about-students.jpg";
-const values = [{
-  icon: Target,
-  title: "Excellence",
-  description: "Striving for the highest standards in all endeavors"
-}, {
-  icon: Heart,
-  title: "Community",
-  description: "Building lasting bonds and supporting each other"
-}, {
-  icon: Lightbulb,
-  title: "Innovation",
-  description: "Embracing new ideas and creative solutions"
-}, {
-  icon: Users,
-  title: "Leadership",
-  description: "Developing tomorrow's leaders today"
-}];
-export function AboutPreview() {
-  return (
-    <section className="py-16 sm:py-24 bg-background relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-48 sm:w-96 h-48 sm:h-96 bg-primary rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-48 sm:w-96 h-48 sm:h-96 bg-accent rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
-      </div>
+import { cn } from "@/lib/utils";
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-          {/* Image Side */}
+const newsItems = [
+  {
+    id: 1,
+    title: "Hashim Thangal Excellenci Award Ended",
+    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop",
+  },
+  {
+    id: 2,
+    title: "Annual Cultural Festival 2024",
+    image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=400&fit=crop",
+  },
+  {
+    id: 3,
+    title: "Community Service Day",
+    image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600&h=400&fit=crop",
+  },
+];
+
+const upcomingEvents = [
+  {
+    id: 1,
+    title: "Mala-Mawilid conference",
+    description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+    date: "On 2025 February 16 Wednesday",
+    location: "At Hasanath Grand JUma masjid",
+  },
+  {
+    id: 2,
+    title: "Malayalima",
+    description: "Annual malayalam literature event celebrating our rich cultural heritage.",
+    date: "On 2025 March 10",
+    location: "Main Auditorium",
+  },
+  {
+    id: 3,
+    title: "Documentary show",
+    description: "A documentary screening on the history of Islamic education.",
+    date: "On 2025 March 15",
+    location: "Conference Hall",
+  },
+  {
+    id: 4,
+    title: "Poem Writing contest",
+    description: "Inter-college poetry writing competition.",
+    date: "On 2025 March 20",
+    location: "Library Hall",
+  },
+  {
+    id: 5,
+    title: "Palestine discussion",
+    description: "An open forum to discuss the humanitarian situation.",
+    date: "On 2025 March 25",
+    location: "Seminar Room",
+  },
+];
+
+export function AboutPreview() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [expandedEvent, setExpandedEvent] = useState<number | null>(null);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % newsItems.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + newsItems.length) % newsItems.length);
+  };
+
+  const toggleEvent = (id: number) => {
+    setExpandedEvent(expandedEvent === id ? null : id);
+  };
+
+  return (
+    <section className="py-12 sm:py-16 bg-background">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* News & Updates Slider */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="relative order-2 lg:order-1"
           >
-            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-card-hover">
-              <img
-                alt="Ahsas students community"
-                className="w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover"
-                src="/lovable-uploads/c8289fc4-78f6-43b7-b2e5-947c434bbeda.png"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent" />
-            </div>
-            {/* Floating Card - Hidden on small screens */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="absolute -bottom-4 -right-4 sm:-bottom-8 sm:-right-8 bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-card-hover max-w-[200px] sm:max-w-[260px] hidden xs:block"
-            >
-              <div className="text-3xl sm:text-5xl font-bold text-primary">10+</div>
-              <div className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
-                Years of nurturing student excellence
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">News & Updates</h2>
+            
+            <div className="relative rounded-2xl overflow-hidden shadow-card aspect-[4/3]">
+              {/* Slider Images */}
+              <div className="relative w-full h-full">
+                {newsItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      "absolute inset-0 transition-opacity duration-500",
+                      index === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"
+                    )}
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+                      <h3 className="text-lg sm:text-xl font-bold text-white">{item.title}</h3>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </motion.div>
+
+              {/* Navigation Arrows */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-accent/90 text-white flex items-center justify-center hover:bg-accent transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-accent/90 text-white flex items-center justify-center hover:bg-accent transition-colors"
+              >
+                <ArrowRight className="w-5 h-5" />
+              </button>
+
+              {/* Dots */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                {newsItems.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all",
+                      index === currentSlide ? "bg-white w-6" : "bg-white/50"
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
           </motion.div>
 
-          {/* Content Side */}
+          {/* Upcoming Events Accordion */}
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="order-1 lg:order-2"
           >
-            <span className="text-xs sm:text-sm font-semibold text-accent uppercase tracking-wider">
-              About Ahsas
-            </span>
-            <h2 className="mt-3 sm:mt-4 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-              A Legacy of Excellence & Unity
-            </h2>
-            <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
-              Founded with a vision to empower students, Ahsas (Al Hasanath Students
-              Association) has grown into a vibrant community that fosters academic
-              excellence, leadership development, and lasting friendships.
-            </p>
-            <p className="mt-3 sm:mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
-              Our members are not just students — they are future leaders, innovators,
-              and changemakers who carry the values of integrity, collaboration, and
-              service wherever they go.
-            </p>
-
-            {/* Values Grid */}
-            <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {values.map((value, index) => (
-                <motion.div
-                  key={value.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 * index }}
-                  className="flex items-start gap-3"
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">Upcoming Events</h2>
+            
+            <div className="space-y-3">
+              {upcomingEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className="border border-border rounded-xl overflow-hidden bg-card"
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                    <value.icon className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm sm:text-base text-foreground">{value.title}</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                      {value.description}
-                    </p>
-                  </div>
-                </motion.div>
+                  <button
+                    onClick={() => toggleEvent(event.id)}
+                    className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors"
+                  >
+                    <span className="font-medium text-foreground text-sm sm:text-base pr-4">{event.title}</span>
+                    {expandedEvent === event.id ? (
+                      <ChevronUp className="w-5 h-5 text-primary shrink-0" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-primary shrink-0" />
+                    )}
+                  </button>
+                  
+                  {expandedEvent === event.id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="px-4 pb-4 border-t border-border"
+                    >
+                      <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                        {event.description}
+                      </p>
+                      <div className="mt-3 space-y-1 text-sm">
+                        <p className="text-foreground font-medium">{event.date}</p>
+                        <p className="text-muted-foreground">{event.location}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
               ))}
-            </div>
-
-            <div className="mt-8 sm:mt-10">
-              <Link to="/about">
-                <Button variant="default" size="lg" className="w-full sm:w-auto">
-                  Learn More About Us
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
             </div>
           </motion.div>
         </div>
