@@ -1,53 +1,91 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, Facebook, Instagram, Youtube } from "lucide-react";
-import logo from "/lovable-uploads/c8289fc4-78f6-43b7-b2e5-947c434bbeda.png";
+import { GraduationCap, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 
-const usefulLinks = [
-  { name: "Student Login", href: "/login" },
+const quickLinks = [
+  { name: "Home", href: "/" },
+  { name: "About Us", href: "/about" },
   { name: "News & Events", href: "/news" },
-  { name: "Subwings", href: "/about" },
-  { name: "Featured Articles", href: "/blog" },
+  { name: "Gallery", href: "/gallery" },
+  { name: "Contact", href: "/contact" },
+];
+
+const memberLinks = [
+  { name: "Member Login", href: "/login" },
+  { name: "My Dashboard", href: "/dashboard" },
+  { name: "My Profile", href: "/dashboard/profile" },
+  { name: "Achievements", href: "/dashboard/achievements" },
 ];
 
 const socialLinks = [
   { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: "X", href: "#", label: "X" },
-  { icon: Youtube, href: "#", label: "YouTube" },
+  { icon: Twitter, href: "#", label: "Twitter" },
   { icon: Instagram, href: "#", label: "Instagram" },
+  { icon: Linkedin, href: "#", label: "LinkedIn" },
 ];
 
 export function Footer() {
   return (
-    <footer className="bg-primary">
+    <footer className="bg-primary text-primary-foreground">
       {/* Main Footer */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 items-start">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <img 
-              src={logo} 
-              alt="AHSAS Logo" 
-              className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
-            />
-            <div className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-bold text-primary-foreground">
-                AHSAS
-              </span>
-              <span className="text-[9px] sm:text-[10px] text-primary-foreground/80 font-medium uppercase tracking-wide leading-tight">
-                AL HASANATH<br />STUDENTS<br />ASSOCIATION
-              </span>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
+          {/* Brand */}
+          <div className="space-y-4 sm:space-y-6 sm:col-span-2 lg:col-span-1">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-accent/20 flex items-center justify-center">
+                <GraduationCap className="w-5 h-5 sm:w-7 sm:h-7 text-accent" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-lg sm:text-xl font-bold">Ahsas</span>
+                <span className="text-[9px] sm:text-[10px] text-primary-foreground/70 uppercase tracking-widest">
+                  Students Association
+                </span>
+              </div>
+            </Link>
+            <p className="text-xs sm:text-sm text-primary-foreground/70 leading-relaxed">
+              Al Hasanath Students Association - Empowering students through community, 
+              leadership, and excellence since establishment.
+            </p>
+            <div className="flex gap-2 sm:gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  aria-label={social.label}
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-all duration-300"
+                >
+                  <social.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Useful Links */}
+          {/* Quick Links */}
           <div>
-            <h4 className="text-sm font-semibold text-primary-foreground/70 mb-4">Useful links</h4>
-            <ul className="space-y-2">
-              {usefulLinks.map((link) => (
+            <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">Quick Links</h4>
+            <ul className="space-y-2 sm:space-y-3">
+              {quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
-                    className="text-sm text-primary-foreground hover:text-accent transition-colors"
+                    className="text-xs sm:text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Member Area */}
+          <div>
+            <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">Member Area</h4>
+            <ul className="space-y-2 sm:space-y-3">
+              {memberLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-xs sm:text-sm text-primary-foreground/70 hover:text-accent transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -58,53 +96,47 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-sm font-semibold text-primary-foreground/70 mb-4">Contact</h4>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-primary-foreground/70 shrink-0" />
-                <a href="mailto:dhicahsas@gmail.com" className="text-sm text-primary-foreground hover:text-accent transition-colors">
-                  dhicahsas@gmail.com
+            <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">Contact Us</h4>
+            <ul className="space-y-3 sm:space-y-4">
+              <li className="flex items-start gap-2 sm:gap-3">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-accent shrink-0 mt-0.5" />
+                <span className="text-xs sm:text-sm text-primary-foreground/70">
+                  Al Hasanath Campus, Main Road<br />City, State - 123456
+                </span>
+              </li>
+              <li className="flex items-center gap-2 sm:gap-3">
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-accent shrink-0" />
+                <a href="tel:+1234567890" className="text-xs sm:text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                  +1 234 567 890
                 </a>
               </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-primary-foreground/70 shrink-0" />
-                <a href="tel:+916238781368" className="text-sm text-primary-foreground hover:text-accent transition-colors">
-                  +91 6238 781 368
+              <li className="flex items-center gap-2 sm:gap-3">
+                <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-accent shrink-0" />
+                <a href="mailto:contact@ahsas.org" className="text-xs sm:text-sm text-primary-foreground/70 hover:text-accent transition-colors break-all">
+                  contact@ahsas.org
                 </a>
               </li>
             </ul>
-          </div>
-
-          {/* Social Links */}
-          <div className="flex justify-start lg:justify-end">
-            <div className="flex gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  aria-label={social.label}
-                  className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-300"
-                >
-                  {social.icon === "X" ? (
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                    </svg>
-                  ) : (
-                    <social.icon className="w-5 h-5" />
-                  )}
-                </a>
-              ))}
-            </div>
           </div>
         </div>
       </div>
 
       {/* Bottom Bar */}
       <div className="border-t border-primary-foreground/10">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-xs sm:text-sm text-primary-foreground/60 text-center">
-            Copyright ©{new Date().getFullYear()} AHSAs. All rights reserved
-          </p>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+            <p className="text-xs sm:text-sm text-primary-foreground/60 text-center sm:text-left">
+              © {new Date().getFullYear()} Ahsas - Al Hasanath Students Association. All rights reserved.
+            </p>
+            <div className="flex gap-4 sm:gap-6">
+              <Link to="/privacy" className="text-xs sm:text-sm text-primary-foreground/60 hover:text-accent transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="text-xs sm:text-sm text-primary-foreground/60 hover:text-accent transition-colors">
+                Terms of Service
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
