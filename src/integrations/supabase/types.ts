@@ -18,37 +18,59 @@ export type Database = {
         Row: {
           achievement_date: string | null
           added_by: string | null
+          admin_feedback: string | null
           category: string | null
           created_at: string
           description: string | null
           file_url: string | null
           id: string
           member_id: string
+          points: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
           title: string
         }
         Insert: {
           achievement_date?: string | null
           added_by?: string | null
+          admin_feedback?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
           file_url?: string | null
           id?: string
           member_id: string
+          points?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
           title: string
         }
         Update: {
           achievement_date?: string | null
           added_by?: string | null
+          admin_feedback?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
           file_url?: string | null
           id?: string
           member_id?: string
+          points?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "achievements_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_leaderboard"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "achievements_member_id_fkey"
             columns: ["member_id"]
@@ -120,6 +142,13 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_leaderboard"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "documents_member_id_fkey"
             columns: ["member_id"]
@@ -278,7 +307,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      member_leaderboard: {
+        Row: {
+          achievement_count: number | null
+          department: string | null
+          full_name: string | null
+          member_id: string | null
+          profile_photo_url: string | null
+          total_points: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_user_role: {
