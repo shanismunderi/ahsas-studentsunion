@@ -5,21 +5,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-r from-accent to-amber-600 text-accent-foreground hover:from-accent/90 hover:to-amber-600/90 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30",
-        destructive: "bg-gradient-to-r from-destructive to-red-600 text-destructive-foreground hover:from-destructive/90 hover:to-red-600/90 shadow-lg shadow-destructive/20",
-        outline: "border-2 border-accent/50 bg-transparent text-accent hover:bg-accent/10 hover:border-accent",
+        default: "bg-foreground text-background hover:bg-foreground/90 shadow-lg shadow-foreground/10",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/20",
+        outline: "border-2 border-border bg-transparent text-foreground hover:bg-secondary hover:border-foreground/30",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50",
         ghost: "hover:bg-secondary hover:text-foreground",
-        link: "text-accent underline-offset-4 hover:underline",
-        gold: "bg-gradient-to-r from-accent to-amber-600 text-accent-foreground hover:from-accent/90 hover:to-amber-600/90 shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/40",
-        hero: "bg-gradient-to-r from-accent to-amber-600 text-accent-foreground hover:from-accent/90 hover:to-amber-600/90 shadow-xl shadow-accent/30 hover:shadow-2xl hover:shadow-accent/40 text-base font-bold",
-        "hero-outline": "border-2 border-accent/30 bg-accent/10 text-foreground hover:bg-accent/20 hover:border-accent/50 backdrop-blur-sm",
+        link: "text-foreground underline-offset-4 hover:underline",
+        gold: "bg-foreground text-background hover:bg-foreground/90 shadow-lg shadow-foreground/15",
+        hero: "bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/20 text-base font-bold",
+        "hero-outline": "border-2 border-foreground/30 bg-foreground/10 text-foreground hover:bg-foreground/20 hover:border-foreground/50 backdrop-blur-sm",
         nav: "bg-transparent text-muted-foreground hover:text-foreground hover:bg-secondary",
-        premium: "bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white hover:opacity-90 shadow-lg shadow-purple-500/25",
+        premium: "bg-foreground text-background hover:bg-foreground/90 shadow-lg shadow-foreground/15",
+        subtle: "bg-secondary/50 text-foreground hover:bg-secondary border border-border/30",
       },
       size: {
         default: "h-10 px-5 py-2",

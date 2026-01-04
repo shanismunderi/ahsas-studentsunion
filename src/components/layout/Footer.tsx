@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { GraduationCap, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { GraduationCap, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, ArrowUpRight } from "lucide-react";
 
 const quickLinks = [
   { name: "Home", href: "/" },
@@ -25,36 +25,36 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer className="bg-card border-t border-border">
       {/* Main Footer */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Brand */}
-          <div className="space-y-4 sm:space-y-6 sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-accent/20 flex items-center justify-center">
-                <GraduationCap className="w-5 h-5 sm:w-7 sm:h-7 text-accent" />
+          <div className="space-y-6 sm:col-span-2 lg:col-span-1">
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-12 h-12 rounded-xl bg-foreground/10 flex items-center justify-center group-hover:bg-foreground/15 transition-colors">
+                <GraduationCap className="w-6 h-6 text-foreground" />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg sm:text-xl font-bold">Ahsas</span>
-                <span className="text-[9px] sm:text-[10px] text-primary-foreground/70 uppercase tracking-widest">
+                <span className="text-xl font-bold text-foreground">Ahsas</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
                   Students Association
                 </span>
               </div>
             </Link>
-            <p className="text-xs sm:text-sm text-primary-foreground/70 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Al Hasanath Students Association - Empowering students through community, 
               leadership, and excellence since establishment.
             </p>
-            <div className="flex gap-2 sm:gap-3">
+            <div className="flex gap-2">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-all duration-300"
+                  className="w-10 h-10 rounded-xl bg-secondary border border-border/50 flex items-center justify-center hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-300"
                 >
-                  <social.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <social.icon className="w-4 h-4" />
                 </a>
               ))}
             </div>
@@ -62,15 +62,16 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">Quick Links</h4>
-            <ul className="space-y-2 sm:space-y-3">
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6">Quick Links</h4>
+            <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
-                    className="text-xs sm:text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+                    className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {link.name}
+                    <span>{link.name}</span>
+                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all" />
                   </Link>
                 </li>
               ))}
@@ -79,15 +80,16 @@ export function Footer() {
 
           {/* Member Area */}
           <div>
-            <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">Member Area</h4>
-            <ul className="space-y-2 sm:space-y-3">
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6">Member Area</h4>
+            <ul className="space-y-3">
               {memberLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
-                    className="text-xs sm:text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+                    className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {link.name}
+                    <span>{link.name}</span>
+                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all" />
                   </Link>
                 </li>
               ))}
@@ -96,23 +98,29 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">Contact Us</h4>
-            <ul className="space-y-3 sm:space-y-4">
-              <li className="flex items-start gap-2 sm:gap-3">
-                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-accent shrink-0 mt-0.5" />
-                <span className="text-xs sm:text-sm text-primary-foreground/70">
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6">Contact Us</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <span className="text-sm text-muted-foreground">
                   Al Hasanath Campus, Main Road<br />City, State - 123456
                 </span>
               </li>
-              <li className="flex items-center gap-2 sm:gap-3">
-                <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-accent shrink-0" />
-                <a href="tel:+1234567890" className="text-xs sm:text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <a href="tel:+1234567890" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   +1 234 567 890
                 </a>
               </li>
-              <li className="flex items-center gap-2 sm:gap-3">
-                <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-accent shrink-0" />
-                <a href="mailto:contact@ahsas.org" className="text-xs sm:text-sm text-primary-foreground/70 hover:text-accent transition-colors break-all">
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <a href="mailto:contact@ahsas.org" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   contact@ahsas.org
                 </a>
               </li>
@@ -122,17 +130,17 @@ export function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-primary-foreground/10">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
-            <p className="text-xs sm:text-sm text-primary-foreground/60 text-center sm:text-left">
+      <div className="border-t border-border">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-muted-foreground text-center sm:text-left">
               © {new Date().getFullYear()} Ahsas - Al Hasanath Students Association. All rights reserved.
             </p>
-            <div className="flex gap-4 sm:gap-6">
-              <Link to="/privacy" className="text-xs sm:text-sm text-primary-foreground/60 hover:text-accent transition-colors">
+            <div className="flex gap-6">
+              <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-xs sm:text-sm text-primary-foreground/60 hover:text-accent transition-colors">
+              <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Terms of Service
               </Link>
             </div>

@@ -14,7 +14,6 @@ import {
   X,
   ChevronRight,
   Shield,
-  Sparkles,
   Image,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -69,19 +68,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background noise">
-      {/* Ambient Glow Effects */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-40 w-80 h-80 bg-purple/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-teal/5 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-background">
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-card/95 backdrop-blur-xl border-b border-border/50 flex items-center justify-between px-4">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b border-border flex items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center shadow-lg shadow-accent/20">
-            <GraduationCap className="w-5 h-5 text-accent-foreground" />
+          <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
+            <GraduationCap className="w-5 h-5 text-background" />
           </div>
           <span className="text-lg font-bold text-foreground">Ahsas</span>
         </Link>
@@ -90,7 +82,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             variant="ghost"
             size="icon"
             onClick={() => setSignOutDialogOpen(true)}
-            className="text-muted-foreground hover:text-foreground hover:bg-secondary"
+            className="text-muted-foreground hover:text-foreground"
           >
             <LogOut className="w-5 h-5" />
           </Button>
@@ -108,21 +100,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed top-0 left-0 z-50 w-72 h-screen bg-card/50 backdrop-blur-xl border-r border-border/50 flex-col">
+      <aside className="hidden lg:flex fixed top-0 left-0 z-50 w-64 h-screen bg-card border-r border-border flex-col">
         {/* Logo Section */}
-        <div className="p-6 border-b border-border/50">
+        <div className="p-6 border-b border-border">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-accent/30 rounded-xl blur-xl group-hover:bg-accent/40 transition-colors" />
-              <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center shadow-lg">
-                <GraduationCap className="w-6 h-6 text-accent-foreground" />
-              </div>
+            <div className="w-11 h-11 rounded-xl bg-foreground flex items-center justify-center">
+              <GraduationCap className="w-6 h-6 text-background" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-foreground group-hover:text-accent transition-colors">
+              <span className="text-lg font-bold text-foreground">
                 Ahsas
               </span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
+              <span className="text-[9px] text-muted-foreground uppercase tracking-[0.15em]">
                 {isAdmin ? "Admin Panel" : "Member Portal"}
               </span>
             </div>
@@ -132,35 +121,31 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Navigation */}
         <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
           {isAdmin && (
-            <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl bg-gradient-to-r from-accent/10 to-transparent border border-accent/20">
-              <Shield className="w-4 h-4 text-accent" />
-              <span className="text-xs font-semibold text-accent uppercase tracking-wider">
+            <div className="flex items-center gap-2 px-3 py-2.5 mb-4 rounded-lg bg-secondary border border-border">
+              <Shield className="w-4 h-4 text-foreground/70" />
+              <span className="text-xs font-medium text-foreground/70 uppercase tracking-wider">
                 Admin Access
               </span>
-              <Sparkles className="w-3 h-3 text-accent ml-auto animate-pulse" />
             </div>
           )}
           
           {links.map((link, index) => (
             <motion.div
               key={link.href}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
+              transition={{ delay: index * 0.03 }}
             >
               <Link
                 to={link.href}
                 className={cn(
-                  "group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300",
+                  "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                   isActive(link.href)
-                    ? "bg-gradient-to-r from-accent to-amber-600 text-accent-foreground shadow-lg shadow-accent/20"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 )}
               >
-                <link.icon className={cn(
-                  "w-5 h-5 transition-transform duration-300",
-                  isActive(link.href) ? "" : "group-hover:scale-110"
-                )} />
+                <link.icon className="w-5 h-5" />
                 <span>{link.name}</span>
                 {isActive(link.href) && (
                   <ChevronRight className="w-4 h-4 ml-auto" />
@@ -171,10 +156,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
 
         {/* User Info & Logout */}
-        <div className="p-4 border-t border-border/50">
-          <div className="flex items-center gap-3 px-4 py-3 mb-3 rounded-xl bg-secondary/50">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center ring-2 ring-accent/20">
-              <User className="w-5 h-5 text-accent" />
+        <div className="p-4 border-t border-border">
+          <div className="flex items-center gap-3 px-3 py-2.5 mb-3 rounded-lg bg-secondary">
+            <div className="w-9 h-9 rounded-full bg-foreground/10 flex items-center justify-center border border-border">
+              <User className="w-4 h-4 text-foreground/70" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">
@@ -190,7 +175,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             onClick={() => setSignOutDialogOpen(true)}
             className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
-            <LogOut className="w-5 h-5 mr-3" />
+            <LogOut className="w-4 h-4 mr-3" />
             Sign Out
           </Button>
         </div>
@@ -209,21 +194,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             />
 
             <motion.aside
-              initial={{ x: -288 }}
+              initial={{ x: -256 }}
               animate={{ x: 0 }}
-              exit={{ x: -288 }}
+              exit={{ x: -256 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="lg:hidden fixed top-0 left-0 z-50 w-72 h-screen bg-card/95 backdrop-blur-xl border-r border-border/50 flex flex-col"
+              className="lg:hidden fixed top-0 left-0 z-50 w-64 h-screen bg-card border-r border-border flex flex-col"
             >
               {/* Logo */}
-              <div className="p-6 border-b border-border/50">
+              <div className="p-6 border-b border-border">
                 <Link to="/" className="flex items-center gap-3" onClick={() => setSidebarOpen(false)}>
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center shadow-lg">
-                    <GraduationCap className="w-6 h-6 text-accent-foreground" />
+                  <div className="w-11 h-11 rounded-xl bg-foreground flex items-center justify-center">
+                    <GraduationCap className="w-6 h-6 text-background" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-lg font-bold text-foreground">Ahsas</span>
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
+                    <span className="text-[9px] text-muted-foreground uppercase tracking-[0.15em]">
                       {isAdmin ? "Admin Panel" : "Member Portal"}
                     </span>
                   </div>
@@ -233,9 +218,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* Navigation */}
               <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
                 {isAdmin && (
-                  <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl bg-gradient-to-r from-accent/10 to-transparent border border-accent/20">
-                    <Shield className="w-4 h-4 text-accent" />
-                    <span className="text-xs font-semibold text-accent uppercase tracking-wider">
+                  <div className="flex items-center gap-2 px-3 py-2.5 mb-4 rounded-lg bg-secondary border border-border">
+                    <Shield className="w-4 h-4 text-foreground/70" />
+                    <span className="text-xs font-medium text-foreground/70 uppercase tracking-wider">
                       Admin Access
                     </span>
                   </div>
@@ -247,10 +232,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     to={link.href}
                     onClick={() => setSidebarOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300",
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                       isActive(link.href)
-                        ? "bg-gradient-to-r from-accent to-amber-600 text-accent-foreground shadow-lg shadow-accent/20"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                        ? "bg-foreground text-background"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                     )}
                   >
                     <link.icon className="w-5 h-5" />
@@ -263,10 +248,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </nav>
 
               {/* User Info & Logout */}
-              <div className="p-4 border-t border-border/50">
-                <div className="flex items-center gap-3 px-4 py-3 mb-3 rounded-xl bg-secondary/50">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center ring-2 ring-accent/20">
-                    <User className="w-5 h-5 text-accent" />
+              <div className="p-4 border-t border-border">
+                <div className="flex items-center gap-3 px-3 py-2.5 mb-3 rounded-lg bg-secondary">
+                  <div className="w-9 h-9 rounded-full bg-foreground/10 flex items-center justify-center border border-border">
+                    <User className="w-4 h-4 text-foreground/70" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">
@@ -285,7 +270,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   }}
                   className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
-                  <LogOut className="w-5 h-5 mr-3" />
+                  <LogOut className="w-4 h-4 mr-3" />
                   Sign Out
                 </Button>
               </div>
@@ -295,7 +280,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="lg:ml-72 min-h-screen pt-16 lg:pt-0 relative">
+      <main className="lg:ml-64 min-h-screen pt-16 lg:pt-0 relative">
         <div className="p-4 sm:p-6 lg:p-8">{children}</div>
       </main>
 

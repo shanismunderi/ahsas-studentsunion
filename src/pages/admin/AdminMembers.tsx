@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Plus, Trash2, Edit, Search, UserPlus, Mail, Lock, Phone, Building, IdCard, Eye, EyeOff, Copy, Check } from "lucide-react";
+import { Users, Plus, Trash2, Edit, Search, UserPlus, Mail, Lock, Phone, Building, IdCard, Eye, EyeOff, Copy, Check, FileSpreadsheet } from "lucide-react";
+import { ExcelImportDialog } from "@/components/admin/ExcelImportDialog";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,6 +64,7 @@ export default function AdminMembers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
@@ -279,10 +281,16 @@ export default function AdminMembers() {
               Create and manage member accounts
             </p>
           </div>
-          <Button variant="gold" onClick={() => setIsCreateDialogOpen(true)}>
-            <UserPlus className="w-4 h-4 mr-2" />
-            Create Member
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
+              <FileSpreadsheet className="w-4 h-4 mr-2" />
+              Import Excel
+            </Button>
+            <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-foreground text-background hover:bg-foreground/90">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Create Member
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -640,6 +648,13 @@ export default function AdminMembers() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Excel Import Dialog */}
+        <ExcelImportDialog
+          open={isImportDialogOpen}
+          onOpenChange={setIsImportDialogOpen}
+          onSuccess={fetchMembers}
+        />
       </div>
     </DashboardLayout>
   );
