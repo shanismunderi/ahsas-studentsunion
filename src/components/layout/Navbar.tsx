@@ -94,26 +94,23 @@ export function Navbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           scrolled
-            ? "bg-background/95 backdrop-blur-xl border-b border-border shadow-card"
+            ? "bg-background/95 backdrop-blur-xl border-b border-border"
             : "bg-transparent"
         )}
       >
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
-              <div className="relative">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-primary flex items-center justify-center shadow-card group-hover:shadow-gold transition-shadow duration-300">
-                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-accent" />
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 rounded-full bg-accent shadow-gold" />
+            <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
+              <div className="w-10 h-10 lg:w-11 lg:h-11 rounded-xl bg-foreground flex items-center justify-center">
+                <GraduationCap className="w-5 h-5 lg:w-6 lg:h-6 text-background" />
               </div>
               <div className="flex flex-col">
-                <span className="text-base sm:text-lg lg:text-xl font-bold text-foreground tracking-tight">
+                <span className="text-lg lg:text-xl font-bold text-foreground tracking-tight">
                   Ahsas
                 </span>
-                <span className="text-[7px] sm:text-[8px] lg:text-[10px] text-muted-foreground font-medium uppercase tracking-widest hidden sm:block max-w-[120px] sm:max-w-none truncate">
-                  AL HASANATH STUDENTS
+                <span className="text-[8px] lg:text-[9px] text-muted-foreground font-medium uppercase tracking-[0.15em] hidden sm:block">
+                  Students Association
                 </span>
               </div>
             </Link>
@@ -127,8 +124,8 @@ export function Navbar() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive(link.href)
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "text-foreground bg-secondary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                   )}
                 >
                   {link.name}
@@ -137,17 +134,18 @@ export function Navbar() {
             </div>
 
             {/* CTA Buttons / User Menu */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-3">
+              <ThemeToggle />
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex items-center gap-2 px-3 hover:bg-muted"
+                      className="flex items-center gap-2 px-3 hover:bg-secondary"
                     >
-                      <Avatar className="w-8 h-8">
+                      <Avatar className="w-8 h-8 border border-border">
                         <AvatarImage src={profile?.profile_photo_url || ""} />
-                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                        <AvatarFallback className="bg-foreground text-background text-sm">
                           {getInitials(profile?.full_name)}
                         </AvatarFallback>
                       </Avatar>
@@ -157,7 +155,7 @@ export function Navbar() {
                       <ChevronDown className="w-4 h-4 text-muted-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-popover">
+                  <DropdownMenuContent align="end" className="w-56 bg-popover border-border">
                     <div className="px-3 py-2">
                       <p className="font-medium text-sm">{profile?.full_name}</p>
                       <p className="text-xs text-muted-foreground truncate">
@@ -191,30 +189,32 @@ export function Navbar() {
                 <>
                   <Link to="/login">
                     <Button variant="ghost" size="sm">
-                      Member Login
+                      Sign In
                     </Button>
                   </Link>
                   <Link to="/login">
-                    <Button variant="gold" size="sm">
+                    <Button size="sm">
                       Join Ahsas
                     </Button>
                   </Link>
                 </>
               )}
-              <ThemeToggle />
             </div>
 
             {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-            >
-              {isOpen ? (
-                <X className="w-6 h-6 text-foreground" />
-              ) : (
-                <Menu className="w-6 h-6 text-foreground" />
-              )}
-            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              <ThemeToggle />
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              >
+                {isOpen ? (
+                  <X className="w-6 h-6 text-foreground" />
+                ) : (
+                  <Menu className="w-6 h-6 text-foreground" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Mobile Navigation */}
@@ -227,7 +227,7 @@ export function Navbar() {
                 transition={{ duration: 0.2 }}
                 className="lg:hidden overflow-hidden"
               >
-                <div className="py-4 space-y-1 border-t border-border bg-background/95 backdrop-blur-xl max-h-[calc(100vh-5rem)] overflow-y-auto">
+                <div className="py-4 space-y-1 border-t border-border bg-background max-h-[calc(100vh-5rem)] overflow-y-auto">
                   {navLinks.map((link) => (
                     <Link
                       key={link.href}
@@ -235,24 +235,20 @@ export function Navbar() {
                       className={cn(
                         "block px-4 py-3 rounded-lg text-sm font-medium transition-all",
                         isActive(link.href)
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          ? "text-foreground bg-secondary"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                       )}
                     >
                       {link.name}
                     </Link>
                   ))}
-                  <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-sm text-muted-foreground">Theme</span>
-                    <ThemeToggle />
-                  </div>
                   <div className="pt-3 space-y-2 border-t border-border mt-2 px-4">
                     {user ? (
                       <>
                         <div className="flex items-center gap-3 py-3">
-                          <Avatar className="w-10 h-10 flex-shrink-0">
+                          <Avatar className="w-10 h-10 flex-shrink-0 border border-border">
                             <AvatarImage src={profile?.profile_photo_url || ""} />
-                            <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                            <AvatarFallback className="bg-foreground text-background text-sm">
                               {getInitials(profile?.full_name)}
                             </AvatarFallback>
                           </Avatar>
@@ -280,11 +276,11 @@ export function Navbar() {
                       <>
                         <Link to="/login" className="block">
                           <Button variant="outline" className="w-full h-11">
-                            Member Login
+                            Sign In
                           </Button>
                         </Link>
                         <Link to="/login" className="block">
-                          <Button variant="gold" className="w-full h-11">
+                          <Button className="w-full h-11">
                             Join Ahsas
                           </Button>
                         </Link>
