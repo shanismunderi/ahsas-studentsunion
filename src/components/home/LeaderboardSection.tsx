@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Medal, Award, Crown, Star, TrendingUp, Users, Sparkles, Gem } from "lucide-react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,7 +24,7 @@ interface LeaderboardMember {
   achievement_count: number;
 }
 
-const RANK_COLORS = ["hsl(42 95% 55%)", "hsl(0 0% 75%)", "hsl(30 70% 45%)"];
+const RANK_COLORS = ["hsl(217 91% 50%)", "hsl(215 15% 55%)", "hsl(25 70% 45%)"];
 const RANK_ICONS = [Crown, Medal, Award];
 const RANK_LABELS = ["Champion", "Runner-up", "3rd Place"];
 
@@ -54,7 +55,7 @@ export function LeaderboardSection() {
   const chartData = leaders.slice(0, 6).map((leader, index) => ({
     name: leader.full_name.split(" ")[0],
     points: leader.total_points,
-    fill: index < 3 ? RANK_COLORS[index] : "hsl(220 60% 20%)",
+    fill: index < 3 ? RANK_COLORS[index] : "hsl(215 15% 35%)",
   }));
 
   const getInitials = (name: string) => {
@@ -271,43 +272,44 @@ export function LeaderboardSection() {
                 {/* Full List */}
                 <div className="space-y-2 max-h-52 overflow-y-auto pr-2">
                   {leaders.map((leader, index) => (
-                    <motion.div
-                      key={leader.member_id}
-                      initial={{ opacity: 0, x: 10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.1 * index }}
-                      className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 hover:bg-muted/50 ${
-                        index < 3 ? 'bg-accent/5' : ''
-                      }`}
-                    >
-                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
-                        index === 0 ? 'bg-gradient-to-br from-amber-400 to-yellow-600 text-white' :
-                        index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
-                        index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-800 text-white' :
-                        'bg-muted text-muted-foreground'
-                      }`}>
-                        {index + 1}
-                      </span>
-                      <Avatar className="w-9 h-9 border-2 border-border">
-                        <AvatarImage src={leader.profile_photo_url || undefined} />
-                        <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
-                          {getInitials(leader.full_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground truncate">
-                          {leader.full_name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {leader.achievement_count} achievement{leader.achievement_count !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent/10">
-                        <Gem className="w-3.5 h-3.5 text-accent" />
-                        <span className="text-sm font-bold text-accent">{leader.total_points}</span>
-                      </div>
-                    </motion.div>
+                    <Link key={leader.member_id} to={`/member/${leader.member_id}`}>
+                      <motion.div
+                        initial={{ opacity: 0, x: 10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 * index }}
+                        className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 hover:bg-primary/10 cursor-pointer ${
+                          index < 3 ? 'bg-primary/5' : ''
+                        }`}
+                      >
+                        <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
+                          index === 0 ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground' :
+                          index === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-500 text-white' :
+                          index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-white' :
+                          'bg-muted text-muted-foreground'
+                        }`}>
+                          {index + 1}
+                        </span>
+                        <Avatar className="w-9 h-9 border-2 border-border">
+                          <AvatarImage src={leader.profile_photo_url || undefined} />
+                          <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
+                            {getInitials(leader.full_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">
+                            {leader.full_name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {leader.achievement_count} achievement{leader.achievement_count !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10">
+                          <Gem className="w-3.5 h-3.5 text-primary" />
+                          <span className="text-sm font-bold text-primary">{leader.total_points}</span>
+                        </div>
+                      </motion.div>
+                    </Link>
                   ))}
                 </div>
               </CardContent>
@@ -354,73 +356,75 @@ function PodiumItem({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay, type: "spring", stiffness: 100 }}
-      className="flex flex-col items-center"
-    >
-      {/* Avatar with Crown/Medal */}
-      <div className="relative mb-4">
-        <motion.div
-          whileHover={{ scale: 1.05, y: -5 }}
-          transition={{ type: "spring", stiffness: 300 }}
-        >
-          <Avatar 
-            className={`${avatarSizes[rank as keyof typeof avatarSizes]} border-4 shadow-xl`} 
-            style={{ borderColor: color }}
+    <Link to={`/member/${member.member_id}`}>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay, type: "spring", stiffness: 100 }}
+        className="flex flex-col items-center cursor-pointer group"
+      >
+        {/* Avatar with Crown/Medal */}
+        <div className="relative mb-4">
+          <motion.div
+            whileHover={{ scale: 1.05, y: -5 }}
+            transition={{ type: "spring", stiffness: 300 }}
           >
-            <AvatarImage src={member.profile_photo_url || undefined} />
-            <AvatarFallback 
-              className="text-xl sm:text-2xl font-bold bg-gradient-to-br from-primary/20 to-primary/10 text-primary"
+            <Avatar 
+              className={`${avatarSizes[rank as keyof typeof avatarSizes]} border-4 shadow-xl transition-shadow group-hover:shadow-2xl`} 
+              style={{ borderColor: color }}
             >
-              {getInitials(member.full_name)}
-            </AvatarFallback>
-          </Avatar>
-        </motion.div>
+              <AvatarImage src={member.profile_photo_url || undefined} />
+              <AvatarFallback 
+                className="text-xl sm:text-2xl font-bold bg-gradient-to-br from-primary/20 to-primary/10 text-primary"
+              >
+                {getInitials(member.full_name)}
+              </AvatarFallback>
+            </Avatar>
+          </motion.div>
+          
+          {/* Rank Badge */}
+          <motion.div 
+            initial={{ scale: 0, rotate: -180 }}
+            whileInView={{ scale: 1, rotate: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: delay + 0.2, type: "spring", stiffness: 200 }}
+            className="absolute -bottom-2 -right-2 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg"
+            style={{ 
+              background: `linear-gradient(135deg, ${color}, ${color}dd)`,
+            }}
+          >
+            <RankIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          </motion.div>
+        </div>
         
-        {/* Rank Badge */}
+        {/* Name */}
+        <p className="text-sm sm:text-base font-bold text-foreground text-center max-w-24 sm:max-w-28 truncate mb-1 group-hover:text-primary transition-colors">
+          {member.full_name.split(" ")[0]}
+        </p>
+        
+        {/* Podium */}
         <motion.div 
-          initial={{ scale: 0, rotate: -180 }}
-          whileInView={{ scale: 1, rotate: 0 }}
+          initial={{ height: 0 }}
+          whileInView={{ height: "auto" }}
           viewport={{ once: true }}
-          transition={{ delay: delay + 0.2, type: "spring", stiffness: 200 }}
-          className="absolute -bottom-2 -right-2 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg"
+          transition={{ delay: delay + 0.1, duration: 0.5, ease: "easeOut" }}
+          className={`${heights[rank as keyof typeof heights]} w-24 sm:w-32 mt-3 rounded-t-2xl flex flex-col items-center justify-start pt-4 relative overflow-hidden`}
           style={{ 
-            background: `linear-gradient(135deg, ${color}, ${color}dd)`,
+            background: `linear-gradient(180deg, ${color} 0%, ${color}88 100%)`,
           }}
         >
-          <RankIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer" />
+          
+          <span className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg">{rank}</span>
+          <div className="flex items-center gap-1 text-white/90 mt-2 px-3 py-1 rounded-full bg-white/20">
+            <Star className="w-3.5 h-3.5" />
+            <span className="text-xs sm:text-sm font-bold">{member.total_points}</span>
+          </div>
+          <p className="text-[10px] sm:text-xs text-white/70 mt-2 font-medium">{label}</p>
         </motion.div>
-      </div>
-      
-      {/* Name */}
-      <p className="text-sm sm:text-base font-bold text-foreground text-center max-w-24 sm:max-w-28 truncate mb-1">
-        {member.full_name.split(" ")[0]}
-      </p>
-      
-      {/* Podium */}
-      <motion.div 
-        initial={{ height: 0 }}
-        whileInView={{ height: "auto" }}
-        viewport={{ once: true }}
-        transition={{ delay: delay + 0.1, duration: 0.5, ease: "easeOut" }}
-        className={`${heights[rank as keyof typeof heights]} w-24 sm:w-32 mt-3 rounded-t-2xl flex flex-col items-center justify-start pt-4 relative overflow-hidden`}
-        style={{ 
-          background: `linear-gradient(180deg, ${color} 0%, ${color}88 100%)`,
-        }}
-      >
-        {/* Shimmer effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer" />
-        
-        <span className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg">{rank}</span>
-        <div className="flex items-center gap-1 text-white/90 mt-2 px-3 py-1 rounded-full bg-white/20">
-          <Star className="w-3.5 h-3.5" />
-          <span className="text-xs sm:text-sm font-bold">{member.total_points}</span>
-        </div>
-        <p className="text-[10px] sm:text-xs text-white/70 mt-2 font-medium">{label}</p>
       </motion.div>
-    </motion.div>
+    </Link>
   );
 }

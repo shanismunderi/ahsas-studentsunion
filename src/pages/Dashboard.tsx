@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Announcement {
   id: string;
@@ -94,18 +95,23 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative"
+          className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
         >
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-[0.2em]">
-            Dashboard
-          </span>
-          <h1 className="mt-2 text-4xl md:text-5xl font-bold text-foreground tracking-tight">
-            Welcome back,{" "}
-            <span className="text-muted-foreground">
-              {profile?.full_name?.split(" ")[0] || "Member"}
+          <div>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-[0.2em]">
+              Dashboard
             </span>
-          </h1>
-          <div className="mt-4 h-px w-24 bg-foreground/20" />
+            <h1 className="mt-2 text-4xl md:text-5xl font-bold text-foreground tracking-tight">
+              Welcome back,{" "}
+              <span className="text-muted-foreground">
+                {profile?.full_name?.split(" ")[0] || "Member"}
+              </span>
+            </h1>
+            <div className="mt-4 h-px w-24 bg-foreground/20" />
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+          </div>
         </motion.div>
 
         {/* Stats Grid */}
