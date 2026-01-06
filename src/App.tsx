@@ -28,6 +28,7 @@ import AdminPosts from "./pages/admin/AdminPosts";
 import AdminGallery from "./pages/admin/AdminGallery";
 import AdminSettings from "./pages/admin/AdminSettings";
 import MemberProfile from "./pages/MemberProfile";
+import Members from "./pages/Members";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/members" element={<Members />} />
               <Route path="/member/:memberId" element={<MemberProfile />} />
 
               {/* Member Routes */}
