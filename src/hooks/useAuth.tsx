@@ -28,6 +28,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signInWithAdmissionNumber: (admissionNumber: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -106,6 +107,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error as Error | null };
   };
 
+  // New function to sign in with admission number
+  const signInWithAdmissionNumber = async (admissionNumber: string, password: string) => {
+    try {
+      // First, find the user's email by their admission number (member_id)
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("member_id", admissionNumber.toUpperCase())
+        .maybeSingle();
+
+      if (profileError || !profileData?.email) {
+        return { error: new Error("Invalid admission number. Please check and try again.") };
+      }
+
+      // Now sign in with the email
+      const { error } = await supabase.auth.signInWithPassword({
+        email: profileData.email,
+        password,
+      });
+
+      if (error) {
+        return { error: new Error("Invalid password. Please try again.") };
+      }
+
+      return { error: null };
+    } catch (err) {
+      return { error: new Error("An error occurred. Please try again.") };
+    }
+  };
+
   const signUp = async (email: string, password: string, fullName: string) => {
     const redirectUrl = `${window.location.origin}/`;
     const { error } = await supabase.auth.signUp({
@@ -143,6 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin: role === "admin",
         isLoading,
         signIn,
+        signInWithAdmissionNumber,
         signUp,
         signOut,
         refreshProfile,

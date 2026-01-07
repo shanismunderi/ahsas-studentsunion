@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Plus, Trash2, Edit, Search, UserPlus, Mail, Lock, Phone, Building, IdCard, Eye, EyeOff, Copy, Check, FileSpreadsheet } from "lucide-react";
+import { Users, Trash2, Edit, Search, UserPlus, Lock, Phone, Building, IdCard, Eye, EyeOff, Copy, Check, FileSpreadsheet, KeyRound } from "lucide-react";
 import { ExcelImportDialog } from "@/components/admin/ExcelImportDialog";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -66,13 +66,17 @@ export default function AdminMembers() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
+  const [memberToResetPassword, setMemberToResetPassword] = useState<Member | null>(null);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [createdCredentials, setCreatedCredentials] = useState<{ admissionNumber: string; password: string } | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetPasswordResult, setResetPasswordResult] = useState<{ admissionNumber: string; password: string } | null>(null);
   
   const [createFormData, setCreateFormData] = useState({
     full_name: "",
@@ -80,7 +84,7 @@ export default function AdminMembers() {
     password: "",
     phone: "",
     department: "",
-    member_id: "",
+    member_id: "", // This is the admission number
   });
 
   const [editFormData, setEditFormData] = useState({
@@ -96,7 +100,7 @@ export default function AdminMembers() {
     for (let i = 0; i < 12; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    setCreateFormData({ ...createFormData, password });
+    return password;
   };
 
   const copyToClipboard = async (text: string, field: string) => {
@@ -135,8 +139,8 @@ export default function AdminMembers() {
   }, []);
 
   const handleCreateMember = async () => {
-    if (!createFormData.full_name || !createFormData.email || !createFormData.password) {
-      toast({ title: "Please fill in all required fields", variant: "destructive" });
+    if (!createFormData.full_name || !createFormData.email || !createFormData.password || !createFormData.member_id) {
+      toast({ title: "Please fill in all required fields (Name, Email, Password, Admission Number)", variant: "destructive" });
       return;
     }
 
@@ -160,7 +164,10 @@ export default function AdminMembers() {
         throw new Error(response.data.error);
       }
 
-      setCreatedCredentials({ email: createFormData.email, password: createFormData.password });
+      setCreatedCredentials({ 
+        admissionNumber: createFormData.member_id.toUpperCase(), 
+        password: createFormData.password 
+      });
       toast({ title: "Member created successfully!" });
       fetchMembers();
       
@@ -189,6 +196,40 @@ export default function AdminMembers() {
       fetchMembers();
     }
     setIsSubmitting(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (!memberToResetPassword || !newPassword) return;
+
+    setIsSubmitting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('reset-password', {
+        body: { 
+          email: memberToResetPassword.email, 
+          new_password: newPassword 
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
+
+      if (response.error || response.data?.error) {
+        throw new Error(response.data?.error || response.error?.message);
+      }
+
+      setResetPasswordResult({
+        admissionNumber: memberToResetPassword.member_id || "N/A",
+        password: newPassword
+      });
+      toast({ title: "Password reset successfully!" });
+      
+    } catch (error: any) {
+      toast({ title: "Error resetting password", description: error.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteMember = async () => {
@@ -245,6 +286,13 @@ export default function AdminMembers() {
     setIsEditDialogOpen(true);
   };
 
+  const openResetPasswordDialog = (member: Member) => {
+    setMemberToResetPassword(member);
+    setNewPassword(generatePassword());
+    setResetPasswordResult(null);
+    setIsResetPasswordDialogOpen(true);
+  };
+
   const resetCreateDialog = () => {
     setCreateFormData({
       full_name: "",
@@ -258,6 +306,13 @@ export default function AdminMembers() {
     setIsCreateDialogOpen(false);
   };
 
+  const resetPasswordDialog = () => {
+    setMemberToResetPassword(null);
+    setNewPassword("");
+    setResetPasswordResult(null);
+    setIsResetPasswordDialogOpen(false);
+  };
+
   const filteredMembers = members.filter(
     (m) =>
       m.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -267,26 +322,30 @@ export default function AdminMembers() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="space-y-6 sm:space-y-8">
+        {/* Header */}
+        <div className="flex flex-col gap-4">
           <div>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-bold text-foreground"
+              className="text-2xl sm:text-3xl font-bold text-foreground"
             >
               Manage Members
             </motion.h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
               Create and manage member accounts
             </p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <Button variant="outline" onClick={() => setIsImportDialogOpen(true)} className="w-full sm:w-auto">
               <FileSpreadsheet className="w-4 h-4 mr-2" />
               Import Excel
             </Button>
-            <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-foreground text-background hover:bg-foreground/90">
+            <Button onClick={() => {
+              setCreateFormData(prev => ({ ...prev, password: generatePassword() }));
+              setIsCreateDialogOpen(true);
+            }} className="w-full sm:w-auto bg-primary hover:bg-primary/90">
               <UserPlus className="w-4 h-4 mr-2" />
               Create Member
             </Button>
@@ -294,154 +353,237 @@ export default function AdminMembers() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <Card className="border-border/50">
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{members.length}</p>
-                <p className="text-sm text-muted-foreground">Total Members</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{members.length}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Total Members</p>
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-border/50">
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-accent" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-xl sm:text-2xl font-bold text-foreground">
                   {Object.values(roles).filter(r => r === 'admin').length}
                 </p>
-                <p className="text-sm text-muted-foreground">Admins</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Admins</p>
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-border/50">
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-teal/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-teal" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-xl sm:text-2xl font-bold text-foreground">
                   {Object.values(roles).filter(r => r === 'member').length}
                 </p>
-                <p className="text-sm text-muted-foreground">Members</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Members</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Search */}
-        <div className="relative max-w-md">
+        <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name, email, or member ID..."
+            placeholder="Search by name or admission number..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
 
-        {/* Members Table */}
-        <Card>
+        {/* Members Table - Responsive */}
+        <Card className="border-border/50 overflow-hidden">
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Member</TableHead>
-                  <TableHead>Member ID</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      Loading...
-                    </TableCell>
+                    <TableHead>Member</TableHead>
+                    <TableHead>Admission No.</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ) : filteredMembers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      No members found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredMembers.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-foreground">{member.full_name}</p>
-                          <p className="text-sm text-muted-foreground">{member.email}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{member.member_id || "Not assigned"}</Badge>
-                      </TableCell>
-                      <TableCell>{member.department || "-"}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={roles[member.user_id] || "member"}
-                          onValueChange={(value: "admin" | "member") => handleRoleChange(member.user_id, value)}
-                        >
-                          <SelectTrigger className="w-28">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="member">Member</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openEditDialog(member)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setMemberToDelete(member);
-                              setDeleteConfirmOpen(true);
-                            }}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        Loading...
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : filteredMembers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        No members found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredMembers.map((member) => (
+                      <TableRow key={member.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium text-foreground">{member.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{member.email}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="font-mono">
+                            {member.member_id || "Not assigned"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{member.department || "-"}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={roles[member.user_id] || "member"}
+                            onValueChange={(value: "admin" | "member") => handleRoleChange(member.user_id, value)}
+                          >
+                            <SelectTrigger className="w-28">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="member">Member</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openResetPasswordDialog(member)}
+                              title="Reset Password"
+                            >
+                              <KeyRound className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(member)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setMemberToDelete(member);
+                                setDeleteConfirmOpen(true);
+                              }}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-border">
+              {isLoading ? (
+                <div className="p-6 text-center text-muted-foreground">Loading...</div>
+              ) : filteredMembers.length === 0 ? (
+                <div className="p-6 text-center text-muted-foreground">No members found</div>
+              ) : (
+                filteredMembers.map((member) => (
+                  <div key={member.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium text-foreground">{member.full_name}</p>
+                        <p className="text-sm text-muted-foreground">{member.email}</p>
+                      </div>
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {member.member_id || "N/A"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Dept: </span>
+                        <span>{member.department || "-"}</span>
+                      </div>
+                      <Select
+                        value={roles[member.user_id] || "member"}
+                        onValueChange={(value: "admin" | "member") => handleRoleChange(member.user_id, value)}
+                      >
+                        <SelectTrigger className="w-24 h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="member">Member</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openResetPasswordDialog(member)}
+                        className="flex-1"
+                      >
+                        <KeyRound className="w-4 h-4 mr-1" />
+                        Reset Password
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditDialog(member)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setMemberToDelete(member);
+                          setDeleteConfirmOpen(true);
+                        }}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
 
         {/* Create Member Dialog */}
         <Dialog open={isCreateDialogOpen} onOpenChange={(open) => !open && resetCreateDialog()}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-accent" />
+                <UserPlus className="w-5 h-5 text-primary" />
                 {createdCredentials ? "Member Created!" : "Create New Member"}
               </DialogTitle>
             </DialogHeader>
             
             {createdCredentials ? (
               <div className="space-y-4 pt-4">
-                <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-                  <p className="text-sm text-green-600 dark:text-green-400 font-medium mb-2">
+                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mb-2">
                     Share these credentials with the new member:
                   </p>
                 </div>
@@ -449,15 +591,15 @@ export default function AdminMembers() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
                     <div>
-                      <p className="text-xs text-muted-foreground">Email</p>
-                      <p className="font-medium">{createdCredentials.email}</p>
+                      <p className="text-xs text-muted-foreground">Admission Number</p>
+                      <p className="font-medium font-mono">{createdCredentials.admissionNumber}</p>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => copyToClipboard(createdCredentials.email, 'email')}
+                      onClick={() => copyToClipboard(createdCredentials.admissionNumber, 'admission')}
                     >
-                      {copiedField === 'email' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                      {copiedField === 'admission' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                     </Button>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
@@ -470,19 +612,19 @@ export default function AdminMembers() {
                       size="sm"
                       onClick={() => copyToClipboard(createdCredentials.password, 'password')}
                     >
-                      {copiedField === 'password' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                      {copiedField === 'password' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                     </Button>
                   </div>
                 </div>
 
-                <Button variant="gold" className="w-full mt-4" onClick={resetCreateDialog}>
+                <Button className="w-full mt-4 bg-primary hover:bg-primary/90" onClick={resetCreateDialog}>
                   Done
                 </Button>
               </div>
             ) : (
               <div className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Users className="w-4 h-4" /> Full Name *
                     </label>
@@ -493,9 +635,21 @@ export default function AdminMembers() {
                       className="mt-1"
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                      <Mail className="w-4 h-4" /> Email *
+                      <IdCard className="w-4 h-4" /> Admission Number *
+                    </label>
+                    <Input
+                      value={createFormData.member_id}
+                      onChange={(e) => setCreateFormData({ ...createFormData, member_id: e.target.value.toUpperCase() })}
+                      placeholder="AHS-2024-001"
+                      className="mt-1 uppercase font-mono"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">This will be used for login</p>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      Email (for system use) *
                     </label>
                     <Input
                       type="email"
@@ -505,7 +659,7 @@ export default function AdminMembers() {
                       className="mt-1"
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Lock className="w-4 h-4" /> Password *
                     </label>
@@ -526,21 +680,10 @@ export default function AdminMembers() {
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
-                      <Button type="button" variant="outline" onClick={generatePassword}>
+                      <Button type="button" variant="outline" onClick={() => setCreateFormData({ ...createFormData, password: generatePassword() })}>
                         Generate
                       </Button>
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                      <IdCard className="w-4 h-4" /> Member ID
-                    </label>
-                    <Input
-                      value={createFormData.member_id}
-                      onChange={(e) => setCreateFormData({ ...createFormData, member_id: e.target.value })}
-                      placeholder="AHS-001"
-                      className="mt-1"
-                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -553,7 +696,7 @@ export default function AdminMembers() {
                       className="mt-1"
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Building className="w-4 h-4" /> Department
                     </label>
@@ -566,12 +709,114 @@ export default function AdminMembers() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={resetCreateDialog} disabled={isSubmitting}>
+                <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={resetCreateDialog} disabled={isSubmitting} className="w-full sm:w-auto">
                     Cancel
                   </Button>
-                  <Button variant="gold" onClick={handleCreateMember} disabled={isSubmitting}>
+                  <Button onClick={handleCreateMember} disabled={isSubmitting} className="w-full sm:w-auto bg-primary hover:bg-primary/90">
                     {isSubmitting ? "Creating..." : "Create Member"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Password Dialog */}
+        <Dialog open={isResetPasswordDialogOpen} onOpenChange={(open) => !open && resetPasswordDialog()}>
+          <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-primary" />
+                {resetPasswordResult ? "Password Reset!" : "Reset Password"}
+              </DialogTitle>
+            </DialogHeader>
+
+            {resetPasswordResult ? (
+              <div className="space-y-4 pt-4">
+                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                    Password has been reset. Share these credentials with the member:
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Admission Number</p>
+                      <p className="font-medium font-mono">{resetPasswordResult.admissionNumber}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(resetPasswordResult.admissionNumber, 'reset-admission')}
+                    >
+                      {copiedField === 'reset-admission' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+                    <div>
+                      <p className="text-xs text-muted-foreground">New Password</p>
+                      <p className="font-medium font-mono">{resetPasswordResult.password}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(resetPasswordResult.password, 'reset-password')}
+                    >
+                      {copiedField === 'reset-password' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                <Button className="w-full mt-4 bg-primary hover:bg-primary/90" onClick={resetPasswordDialog}>
+                  Done
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4 pt-4">
+                <div className="p-4 rounded-xl bg-muted/50 border">
+                  <p className="text-sm">
+                    Resetting password for: <strong>{memberToResetPassword?.full_name}</strong>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Admission: {memberToResetPassword?.member_id || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Lock className="w-4 h-4" /> New Password
+                  </label>
+                  <div className="flex gap-2 mt-1">
+                    <div className="relative flex-1">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Enter new password"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <Button type="button" variant="outline" onClick={() => setNewPassword(generatePassword())}>
+                      Generate
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={resetPasswordDialog} disabled={isSubmitting} className="w-full sm:w-auto">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleResetPassword} disabled={isSubmitting || !newPassword} className="w-full sm:w-auto bg-primary hover:bg-primary/90">
+                    {isSubmitting ? "Resetting..." : "Reset Password"}
                   </Button>
                 </div>
               </div>
@@ -581,7 +826,7 @@ export default function AdminMembers() {
 
         {/* Edit Member Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent>
+          <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Member</DialogTitle>
             </DialogHeader>
@@ -591,6 +836,15 @@ export default function AdminMembers() {
                 <Input
                   value={editFormData.full_name}
                   onChange={(e) => setEditFormData({ ...editFormData, full_name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Admission Number</label>
+                <Input
+                  value={editFormData.member_id}
+                  onChange={(e) => setEditFormData({ ...editFormData, member_id: e.target.value.toUpperCase() })}
+                  className="mt-1 uppercase font-mono"
                 />
               </div>
               <div>
@@ -598,6 +852,7 @@ export default function AdminMembers() {
                 <Input
                   value={editFormData.phone}
                   onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                  className="mt-1"
                 />
               </div>
               <div>
@@ -605,20 +860,14 @@ export default function AdminMembers() {
                 <Input
                   value={editFormData.department}
                   onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
+                  className="mt-1"
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Member ID</label>
-                <Input
-                  value={editFormData.member_id}
-                  onChange={(e) => setEditFormData({ ...editFormData, member_id: e.target.value })}
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isSubmitting}>
+              <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isSubmitting} className="w-full sm:w-auto">
                   Cancel
                 </Button>
-                <Button variant="gold" onClick={handleSaveMember} disabled={isSubmitting}>
+                <Button onClick={handleSaveMember} disabled={isSubmitting} className="w-full sm:w-auto bg-primary hover:bg-primary/90">
                   {isSubmitting ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
@@ -628,7 +877,7 @@ export default function AdminMembers() {
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-          <AlertDialogContent>
+          <AlertDialogContent className="w-[95vw] max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Member</AlertDialogTitle>
               <AlertDialogDescription>
@@ -636,12 +885,12 @@ export default function AdminMembers() {
                 This action cannot be undone and will permanently remove their account and all associated data.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+              <AlertDialogCancel disabled={isSubmitting} className="w-full sm:w-auto">Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteMember}
                 disabled={isSubmitting}
-                className="bg-destructive hover:bg-destructive/90"
+                className="w-full sm:w-auto bg-destructive hover:bg-destructive/90"
               >
                 {isSubmitting ? "Deleting..." : "Delete Member"}
               </AlertDialogAction>
