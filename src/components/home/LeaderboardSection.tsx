@@ -24,7 +24,7 @@ interface LeaderboardMember {
   achievement_count: number;
 }
 
-const RANK_COLORS = ["hsl(221 83% 53%)", "hsl(220 9% 46%)", "hsl(28 70% 50%)"];
+const RANK_COLORS = ["hsl(217 91% 50%)", "hsl(215 15% 55%)", "hsl(25 70% 45%)"];
 const RANK_ICONS = [Crown, Medal, Award];
 const RANK_LABELS = ["Champion", "Runner-up", "3rd Place"];
 
