@@ -54,6 +54,7 @@ interface Achievement {
   points: number;
   admin_feedback: string | null;
   reviewed_by: string | null;
+  conducted_by: string | null;
   profiles?: { full_name: string };
 }
 
@@ -63,12 +64,15 @@ interface Member {
 }
 
 const POINT_OPTIONS = [
+  { value: 10, label: "10 - Minor" },
   { value: 25, label: "25 - Basic" },
   { value: 50, label: "50 - Notable" },
   { value: 75, label: "75 - Outstanding" },
   { value: 100, label: "100 - Exceptional" },
   { value: 150, label: "150 - Excellence" },
   { value: 200, label: "200 - Extraordinary" },
+  { value: 250, label: "250 - Legendary" },
+  { value: 300, label: "300 - Supreme" },
 ];
 
 export default function AdminAchievements() {
@@ -92,6 +96,8 @@ export default function AdminAchievements() {
     achievement_date: "",
     file_url: "",
     points: 100,
+    conducted_by: "",
+    custom_points: "",
   });
 
   const fetchData = async () => {
@@ -118,11 +124,24 @@ export default function AdminAchievements() {
       return;
     }
 
+    const finalPoints = formData.custom_points ? parseInt(formData.custom_points) : formData.points;
+
+    const saveData = {
+      member_id: formData.member_id,
+      title: formData.title,
+      description: formData.description || null,
+      category: formData.category || null,
+      achievement_date: formData.achievement_date || null,
+      file_url: formData.file_url || null,
+      conducted_by: formData.conducted_by || null,
+      points: finalPoints,
+    };
+
     if (editingAchievement) {
       const { error } = await supabase
         .from("achievements")
         .update({
-          ...formData,
+          ...saveData,
           status: 'approved',
           reviewed_by: user?.id,
           reviewed_at: new Date().toISOString(),
@@ -136,7 +155,7 @@ export default function AdminAchievements() {
       }
     } else {
       const { error } = await supabase.from("achievements").insert({
-        ...formData,
+        ...saveData,
         added_by: user?.id,
         status: 'approved',
         reviewed_by: user?.id,
@@ -229,6 +248,8 @@ export default function AdminAchievements() {
         achievement_date: achievement.achievement_date || "",
         file_url: achievement.file_url || "",
         points: achievement.points || 100,
+        conducted_by: achievement.conducted_by || "",
+        custom_points: "",
       });
     } else {
       resetForm();
@@ -251,6 +272,8 @@ export default function AdminAchievements() {
       achievement_date: "",
       file_url: "",
       points: 100,
+      conducted_by: "",
+      custom_points: "",
     });
     setEditingAchievement(null);
   };
@@ -448,7 +471,7 @@ export default function AdminAchievements() {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingAchievement ? "Edit" : "Add"} Achievement</DialogTitle>
             </DialogHeader>
@@ -477,6 +500,14 @@ export default function AdminAchievements() {
                 />
               </div>
               <div>
+                <label className="text-sm font-medium text-muted-foreground">Conducted By</label>
+                <Input
+                  value={formData.conducted_by}
+                  onChange={(e) => setFormData({ ...formData, conducted_by: e.target.value })}
+                  placeholder="e.g., Kerala University, Science Fair"
+                />
+              </div>
+              <div>
                 <label className="text-sm font-medium text-muted-foreground">Category</label>
                 <Input
                   value={formData.category}
@@ -484,21 +515,32 @@ export default function AdminAchievements() {
                   placeholder="e.g., Academic, Sports, Leadership"
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Points</label>
-                <Select
-                  value={formData.points.toString()}
-                  onValueChange={(v) => setFormData({ ...formData, points: parseInt(v) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {POINT_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Points (Preset)</label>
+                  <Select
+                    value={formData.points.toString()}
+                    onValueChange={(v) => setFormData({ ...formData, points: parseInt(v), custom_points: "" })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {POINT_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value.toString()}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Custom Points</label>
+                  <Input
+                    type="number"
+                    value={formData.custom_points}
+                    onChange={(e) => setFormData({ ...formData, custom_points: e.target.value })}
+                    placeholder="e.g., 175"
+                  />
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Date</label>
@@ -524,7 +566,7 @@ export default function AdminAchievements() {
                   placeholder="https://..."
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
                 <Button variant="gold" onClick={handleSave}>
                   {editingAchievement ? "Update" : "Create"}
