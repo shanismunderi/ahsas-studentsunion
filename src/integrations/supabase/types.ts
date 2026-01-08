@@ -20,6 +20,7 @@ export type Database = {
           added_by: string | null
           admin_feedback: string | null
           category: string | null
+          conducted_by: string | null
           created_at: string
           description: string | null
           file_url: string | null
@@ -36,6 +37,7 @@ export type Database = {
           added_by?: string | null
           admin_feedback?: string | null
           category?: string | null
+          conducted_by?: string | null
           created_at?: string
           description?: string | null
           file_url?: string | null
@@ -52,6 +54,7 @@ export type Database = {
           added_by?: string | null
           admin_feedback?: string | null
           category?: string | null
+          conducted_by?: string | null
           created_at?: string
           description?: string | null
           file_url?: string | null

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Trophy, Upload, X, Award, Sparkles, 
   Calendar, FileText, Star, Check, Loader2,
-  Zap, Crown, Target, Gem, Medal
+  Zap, Crown, Target, Gem, Medal, Building
 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ interface AchievementFormDialogProps {
     category: string;
     achievement_date: string;
     file_url: string;
+    conducted_by?: string;
   } | null;
   onSuccess: () => void;
 }
@@ -54,6 +55,7 @@ export function AchievementFormDialog({
     category: "",
     achievement_date: "",
     file_url: "",
+    conducted_by: "",
   });
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -71,6 +73,7 @@ export function AchievementFormDialog({
           category: editingAchievement.category || "",
           achievement_date: editingAchievement.achievement_date || "",
           file_url: editingAchievement.file_url || "",
+          conducted_by: editingAchievement.conducted_by || "",
         });
         setCurrentStep(1);
       } else {
@@ -133,6 +136,11 @@ export function AchievementFormDialog({
       return;
     }
 
+    if (!formData.conducted_by.trim()) {
+      toast.error("Please enter who conducted this achievement/event");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const achievementData = {
@@ -142,6 +150,7 @@ export function AchievementFormDialog({
         category: formData.category,
         achievement_date: formData.achievement_date || null,
         file_url: formData.file_url || null,
+        conducted_by: formData.conducted_by.trim() || null,
         status: 'pending',
         points: 0,
       };
@@ -180,6 +189,7 @@ export function AchievementFormDialog({
       category: "",
       achievement_date: "",
       file_url: "",
+      conducted_by: "",
     });
     setUploadedFileName("");
     setCurrentStep(1);
@@ -498,6 +508,28 @@ export function AchievementFormDialog({
                       className="h-14 bg-muted/30 border-2 border-border/50 focus:border-accent focus:ring-2 focus:ring-accent/20 rounded-xl"
                     />
                   </motion.div>
+
+                  {/* Conducted By */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="space-y-2"
+                  >
+                    <Label className="text-sm font-semibold flex items-center gap-2">
+                      <Building className="w-4 h-4 text-accent" />
+                      Conducted By *
+                    </Label>
+                    <Input
+                      value={formData.conducted_by}
+                      onChange={(e) => setFormData({ ...formData, conducted_by: e.target.value })}
+                      placeholder="e.g., Kerala State Science Fair, University of Calicut"
+                      className="h-14 bg-muted/30 border-2 border-border/50 focus:border-accent focus:ring-2 focus:ring-accent/20 rounded-xl"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Name of the organization or institution that conducted the event/competition
+                    </p>
+                  </motion.div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
@@ -569,6 +601,12 @@ export function AchievementFormDialog({
                         <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {new Date(formData.achievement_date).toLocaleDateString()}
+                        </p>
+                      )}
+                      {formData.conducted_by && (
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                          <Building className="w-3 h-3" />
+                          {formData.conducted_by}
                         </p>
                       )}
                     </div>
