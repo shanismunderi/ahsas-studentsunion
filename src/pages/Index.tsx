@@ -61,25 +61,27 @@ const Index = () => {
     setIsSubmitting(true);
 
     try {
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("member_id", formData.admissionNumber.trim())
-        .maybeSingle();
+      const memberId = formData.admissionNumber.trim();
 
-      if (profileError) {
+      const { data: lookup, error: lookupError } = await supabase.functions.invoke("lookup-email", {
+        body: { member_id: memberId },
+      });
+
+      if (lookupError) {
         toast({ title: "Login failed", description: "An error occurred. Please try again.", variant: "destructive" });
         setIsSubmitting(false);
         return;
       }
 
-      if (!profile) {
+      const email = (lookup as { email: string | null } | null)?.email;
+
+      if (!email) {
         toast({ title: "Login failed", description: "Invalid admission number. Please check and try again.", variant: "destructive" });
         setIsSubmitting(false);
         return;
       }
 
-      const { error } = await signIn(profile.email, formData.password);
+      const { error } = await signIn(email, formData.password);
       if (error) {
         toast({ title: "Login failed", description: "Invalid password. Please try again.", variant: "destructive" });
       } else {
