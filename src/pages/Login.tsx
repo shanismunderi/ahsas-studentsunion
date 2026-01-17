@@ -27,28 +27,27 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const memberId = formData.admissionNumber.trim();
+      // First, look up the email by admission number (member_id)
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("member_id", formData.admissionNumber.trim())
+        .maybeSingle();
 
-      const { data: lookup, error: lookupError } = await supabase.functions.invoke("lookup-email", {
-        body: { member_id: memberId },
-      });
-
-      if (lookupError) {
+      if (profileError) {
         toast({ title: "Login failed", description: "An error occurred. Please try again.", variant: "destructive" });
         setIsSubmitting(false);
         return;
       }
 
-      const email = (lookup as { email: string | null } | null)?.email;
-
-      if (!email) {
+      if (!profile) {
         toast({ title: "Login failed", description: "Invalid admission number. Please check and try again.", variant: "destructive" });
         setIsSubmitting(false);
         return;
       }
 
       // Now sign in with the found email
-      const { error } = await signIn(email, formData.password);
+      const { error } = await signIn(profile.email, formData.password);
       if (error) {
         toast({ title: "Login failed", description: "Invalid password. Please try again.", variant: "destructive" });
       } else {

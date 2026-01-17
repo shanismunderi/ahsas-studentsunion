@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Update the profile with additional info including password for admin viewing
+    // Update the profile with additional info
     if (newUser.user) {
       await supabaseAdmin
         .from('profiles')
@@ -83,8 +83,7 @@ Deno.serve(async (req) => {
           member_id, 
           phone, 
           department,
-          full_name,
-          password_plaintext: password  // Store password for admin viewing
+          full_name 
         })
         .eq('user_id', newUser.user.id)
     }
