@@ -50,7 +50,6 @@ interface Member {
   department: string;
   member_id: string;
   created_at: string;
-  password_plaintext: string | null;
 }
 
 interface UserRole {
@@ -74,7 +73,6 @@ export default function AdminMembers() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
-  const [visiblePasswordId, setVisiblePasswordId] = useState<string | null>(null);
   
   const [createFormData, setCreateFormData] = useState({
     full_name: "",
@@ -355,7 +353,6 @@ export default function AdminMembers() {
                 <TableRow>
                   <TableHead>Member</TableHead>
                   <TableHead>Member ID</TableHead>
-                  <TableHead>Password</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -364,13 +361,13 @@ export default function AdminMembers() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                    <TableCell colSpan={5} className="text-center py-8">
                       Loading...
                     </TableCell>
                   </TableRow>
                 ) : filteredMembers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                       No members found
                     </TableCell>
                   </TableRow>
@@ -385,41 +382,6 @@ export default function AdminMembers() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{member.member_id || "Not assigned"}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {member.password_plaintext ? (
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm">
-                              {visiblePasswordId === member.id ? member.password_plaintext : "••••••••"}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => setVisiblePasswordId(visiblePasswordId === member.id ? null : member.id)}
-                            >
-                              {visiblePasswordId === member.id ? (
-                                <EyeOff className="w-3.5 h-3.5" />
-                              ) : (
-                                <Eye className="w-3.5 h-3.5" />
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => copyToClipboard(member.password_plaintext!, `pwd-${member.id}`)}
-                            >
-                              {copiedField === `pwd-${member.id}` ? (
-                                <Check className="w-3.5 h-3.5 text-green-500" />
-                              ) : (
-                                <Copy className="w-3.5 h-3.5" />
-                              )}
-                            </Button>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">Not available</span>
-                        )}
                       </TableCell>
                       <TableCell>{member.department || "-"}</TableCell>
                       <TableCell>
