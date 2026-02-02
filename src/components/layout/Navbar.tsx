@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navLinks = [
-  { name: "Home", href: "/" },
+  { name: "Home", href: "/home" },
   { name: "About", href: "/about" },
   { name: "News & Events", href: "/news" },
   { name: "Blog", href: "/blog" },
@@ -48,7 +48,7 @@ export function Navbar() {
   }, [location]);
 
   const isActive = (href: string) => {
-    if (href === "/") return location.pathname === "/";
+    if (href === "/home") return location.pathname === "/home" || location.pathname === "/";
     return location.pathname.startsWith(href);
   };
 
@@ -61,7 +61,7 @@ export function Navbar() {
         title: "Signed out successfully",
         description: "See you next time!",
       });
-      navigate("/");
+      navigate("/home");
     } catch (error) {
       toast({
         title: "Error signing out",
@@ -101,7 +101,7 @@ export function Navbar() {
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
+            <Link to="/home" className="flex items-center gap-3 group flex-shrink-0">
               <div className="w-10 h-10 lg:w-11 lg:h-11 rounded-xl bg-foreground flex items-center justify-center">
                 <GraduationCap className="w-5 h-5 lg:w-6 lg:h-6 text-background" />
               </div>
