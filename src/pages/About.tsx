@@ -85,11 +85,11 @@ const About = () => {
               About Us
             </span>
             <h1 className="mt-4 text-5xl md:text-6xl font-bold text-primary-foreground">
-              Our Story & <span className="text-accent">Mission</span>
+              AHSAs, More than <span className="text-accent">an Union</span>
             </h1>
-            <p className="mt-6 text-xl text-primary-foreground/80">
-              Ahsas - Al Hasanath Students Association has been empowering students and building 
-              leaders for over a decade. Learn about our journey and values.
+            <p className="mt-6 text-xl text-primary-foreground/80 leading-relaxed">
+              AHSA is the student union of Darul Hasanath Islamic College, dedicated to enhancing student life
+              through meaningful programs, academic support, cultural celebrations, and community initiatives.
             </p>
           </motion.div>
         </div>
@@ -110,9 +110,9 @@ const About = () => {
               </div>
               <h2 className="text-3xl font-bold text-foreground">Our Mission</h2>
               <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-                To create a nurturing environment where students can discover their potential, 
-                develop leadership skills, and contribute meaningfully to society while building 
-                lifelong connections with fellow members.
+                To enhance student life through meaningful programs, academic support,
+                cultural celebrations, and community initiatives while fostering an
+                inclusive environment for all members.
               </p>
             </motion.div>
 
@@ -127,8 +127,9 @@ const About = () => {
               </div>
               <h2 className="text-3xl font-bold text-primary-foreground">Our Vision</h2>
               <p className="mt-4 text-lg text-primary-foreground/80 leading-relaxed">
-                To be the leading student association that shapes confident, compassionate, 
-                and capable leaders who make a positive impact in their communities and beyond.
+                With a focus on unity, leadership, and personal growth, we aim to inspire
+                students to learn, lead, and make lasting memories together in a supportive
+                and dynamic community.
               </p>
             </motion.div>
           </div>

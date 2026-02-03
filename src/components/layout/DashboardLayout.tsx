@@ -72,9 +72,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b border-border flex items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
-            <GraduationCap className="w-5 h-5 text-background" />
-          </div>
+          <img src="/logo.png" alt="Ahsas Logo" className="w-10 h-10 object-contain" />
           <span className="text-lg font-bold text-foreground">Ahsas</span>
         </Link>
         <div className="flex items-center gap-2">
@@ -104,9 +102,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Logo Section */}
         <div className="p-6 border-b border-border">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-xl bg-foreground flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-background" />
-            </div>
+            <img src="/logo.png" alt="Ahsas Logo" className="w-10 h-10 object-contain" />
             <div className="flex flex-col">
               <span className="text-lg font-bold text-foreground">
                 Ahsas
@@ -128,7 +124,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </span>
             </div>
           )}
-          
+
           {links.map((link, index) => (
             <motion.div
               key={link.href}
@@ -203,9 +199,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* Logo */}
               <div className="p-6 border-b border-border">
                 <Link to="/" className="flex items-center gap-3" onClick={() => setSidebarOpen(false)}>
-                  <div className="w-11 h-11 rounded-xl bg-foreground flex items-center justify-center">
-                    <GraduationCap className="w-6 h-6 text-background" />
-                  </div>
+                  <img src="/logo.png" alt="Ahsas Logo" className="w-10 h-10 object-contain" />
                   <div className="flex flex-col">
                     <span className="text-lg font-bold text-foreground">Ahsas</span>
                     <span className="text-[9px] text-muted-foreground uppercase tracking-[0.15em]">
@@ -225,7 +219,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     </span>
                   </div>
                 )}
-                
+
                 {links.map((link) => (
                   <Link
                     key={link.href}

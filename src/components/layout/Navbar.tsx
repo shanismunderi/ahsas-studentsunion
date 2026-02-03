@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, GraduationCap, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, formatDisplayName } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { SignOutDialog } from "@/components/SignOutDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -101,16 +101,16 @@ export function Navbar() {
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <Link to="/home" className="flex items-center gap-3 group flex-shrink-0">
+            <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
               <div className="w-10 h-10 lg:w-11 lg:h-11 rounded-xl bg-foreground flex items-center justify-center">
                 <GraduationCap className="w-5 h-5 lg:w-6 lg:h-6 text-background" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg lg:text-xl font-bold text-foreground tracking-tight">
-                  Ahsas
+                  AHSAs
                 </span>
                 <span className="text-[8px] lg:text-[9px] text-muted-foreground font-medium uppercase tracking-[0.15em] hidden sm:block">
-                  Students Association
+                  Al Hasanath Students Association
                 </span>
               </div>
             </Link>
@@ -150,7 +150,7 @@ export function Navbar() {
                         </AvatarFallback>
                       </Avatar>
                       <span className="font-medium text-sm max-w-[120px] truncate">
-                        {profile?.full_name || user.email?.split("@")[0]}
+                        {formatDisplayName(profile?.full_name) || user.email?.split("@")[0]}
                       </span>
                       <ChevronDown className="w-4 h-4 text-muted-foreground" />
                     </Button>
@@ -253,7 +253,7 @@ export function Navbar() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0 flex-1">
-                            <p className="font-medium text-sm truncate">{profile?.full_name}</p>
+                            <p className="font-medium text-sm truncate">{formatDisplayName(profile?.full_name)}</p>
                             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                           </div>
                         </div>

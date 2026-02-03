@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Users, Trophy, Calendar, Star, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import heroBg from "@/assets/hero-bg.jpg";
+import hero_bg from "@/assets/hero_bg.png";
 
 const stats = [
   { icon: Users, value: "500+", label: "Active Members" },
@@ -17,7 +17,7 @@ export function HeroSection() {
       {/* Background */}
       <div className="absolute inset-0">
         <img
-          src={heroBg}
+          src={hero_bg}
           alt="Hero background"
           className="w-full h-full object-cover"
         />
@@ -29,7 +29,7 @@ export function HeroSection() {
       {/* Animated gradient orbs */}
       <div className="absolute top-1/4 right-10 w-32 md:w-96 h-32 md:h-96 bg-foreground/5 rounded-full blur-3xl animate-pulse-slow hidden sm:block" />
       <div className="absolute bottom-1/4 left-10 w-24 md:w-64 h-24 md:h-64 bg-foreground/3 rounded-full blur-3xl animate-pulse-slow hidden sm:block" />
-      
+
       {/* Grid pattern overlay */}
       <div className="absolute inset-0 pattern-dots opacity-30" />
 
@@ -73,8 +73,8 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed"
           >
-            Join a vibrant community of passionate students dedicated to excellence, 
-            leadership, and making a difference. Ahsas is more than an association — 
+            Join a vibrant community of passionate students dedicated to excellence,
+            leadership, and making a difference. Ahsas is more than an association —
             it's a family.
           </motion.p>
 

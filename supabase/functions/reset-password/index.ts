@@ -11,11 +11,45 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    });
+
+    // Verify the requesting user is an admin
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'No authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user: requestingUser }, error: authError } = await supabaseAdmin.auth.getUser(token)
+
+    if (authError || !requestingUser) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Check if requesting user is admin
+    const { data: roleData } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', requestingUser.id)
+      .single()
+
+    if (!roleData || roleData.role !== 'admin') {
+      return new Response(JSON.stringify({ error: 'Unauthorized - Admin access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
 
     const { email, new_password } = await req.json();
 
@@ -28,7 +62,7 @@ Deno.serve(async (req) => {
 
     // Get user by email
     const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    
+
     if (listError) {
       console.error("Error listing users:", listError);
       return new Response(
@@ -38,7 +72,7 @@ Deno.serve(async (req) => {
     }
 
     const user = users.users.find(u => u.email === email);
-    
+
     if (!user) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
@@ -60,8 +94,18 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Update profiles table with new plaintext password
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .update({ password_plaintext: new_password })
+      .eq('user_id', user.id);
+
+    if (profileError) {
+      console.error("Error updating profile password:", profileError);
+    }
+
     console.log(`Password reset successfully for ${email}`);
-    
+
     return new Response(
       JSON.stringify({ success: true, message: "Password updated successfully" }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -76,3 +120,4 @@ Deno.serve(async (req) => {
     );
   }
 });
+

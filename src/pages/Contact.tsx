@@ -11,17 +11,17 @@ const contactInfo = [
   {
     icon: MapPin,
     title: "Visit Us",
-    details: ["Al Hasanath Campus", "Main Road, City", "State - 123456"],
+    details: ["Darul Hasanath Islamic College", "Kannadiparamba, Niduvat", "P.O Narath, Kannur, Kerala - 670601"],
   },
   {
     icon: Phone,
     title: "Call Us",
-    details: ["+1 234 567 890", "+1 234 567 891"],
+    details: ["+91 6238 781 368"],
   },
   {
     icon: Mail,
     title: "Email Us",
-    details: ["contact@ahsas.org", "support@ahsas.org"],
+    details: ["dhicahsas@gmail.com"],
   },
   {
     icon: Clock,

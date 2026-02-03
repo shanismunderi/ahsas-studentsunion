@@ -6,6 +6,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { formatDisplayName } from "@/lib/utils";
 
 interface Announcement {
   id: string;
@@ -104,7 +105,7 @@ export default function Dashboard() {
             <h1 className="mt-2 text-4xl md:text-5xl font-bold text-foreground tracking-tight">
               Welcome back,{" "}
               <span className="text-muted-foreground">
-                {profile?.full_name?.split(" ")[0] || "Member"}
+                {formatDisplayName(profile?.full_name)}
               </span>
             </h1>
             <div className="mt-4 h-px w-24 bg-foreground/20" />
@@ -139,7 +140,7 @@ export default function Dashboard() {
                         <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>
-                    
+
                     <div className="w-14 h-14 rounded-2xl bg-foreground/5 border border-border flex items-center justify-center group-hover:bg-foreground group-hover:border-foreground transition-all duration-300">
                       <stat.icon className="w-6 h-6 text-foreground/60 group-hover:text-background transition-colors" />
                     </div>
@@ -175,7 +176,7 @@ export default function Dashboard() {
                 </span>
               )}
             </div>
-            
+
             {/* Content */}
             <div className="p-6">
               {announcements.length > 0 ? (
@@ -225,7 +226,7 @@ export default function Dashboard() {
           transition={{ delay: 0.4 }}
         >
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Quick Actions</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {quickActions.map((action, index) => (
               <Link key={action.title} to={action.href}>

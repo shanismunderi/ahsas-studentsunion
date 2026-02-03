@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { GraduationCap, Hash, Lock, ArrowRight, Eye, EyeOff, Shield } from "lucide-react";
+import { Hash, Lock, ArrowRight, Eye, EyeOff, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -63,14 +63,8 @@ const Login = () => {
     <div className="min-h-screen flex">
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-background">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-          <Link to="/" className="flex items-center gap-3 mb-8 sm:mb-12">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary flex items-center justify-center shadow-card">
-              <GraduationCap className="w-6 h-6 sm:w-7 sm:h-7 text-accent" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg sm:text-xl font-bold text-foreground">Ahsas</span>
-              <span className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest">Students Association</span>
-            </div>
+          <Link to="/" className="flex items-center mb-8 sm:mb-12">
+            <img src="/logo-full.png" alt="Ahsas Logo" className="h-16 sm:h-20 object-contain" />
           </Link>
 
           <div className="mb-6 sm:mb-8">
@@ -147,10 +141,10 @@ const Login = () => {
         </div>
         <div className="relative z-10 flex flex-col items-center justify-center p-12 text-center">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}>
-            <div className="w-24 h-24 rounded-3xl bg-accent/20 flex items-center justify-center mx-auto mb-8">
-              <GraduationCap className="w-14 h-14 text-accent" />
+            <div className="mb-8">
+              <img src="/logo-full.png" alt="Ahsas Logo" className="h-32 object-contain" />
             </div>
-            <h2 className="text-4xl font-bold text-primary-foreground mb-4">Welcome to the <span className="text-accent">Ahsas</span> Family</h2>
+            <h2 className="text-4xl font-bold text-primary-foreground mb-4">Welcome to the <span className="text-accent">AHSAs</span> Family</h2>
             <p className="text-lg text-primary-foreground/80 max-w-md">Access your dashboard, view achievements, download documents, and stay connected.</p>
           </motion.div>
         </div>

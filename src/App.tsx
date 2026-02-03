@@ -29,6 +29,7 @@ import AdminPosts from "./pages/admin/AdminPosts";
 import AdminGallery from "./pages/admin/AdminGallery";
 import AdminSettings from "./pages/admin/AdminSettings";
 import MemberProfile from "./pages/MemberProfile";
+import { SiteIntro } from "./components/layout/SiteIntro";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
+        <SiteIntro />
         <Toaster />
         <Sonner />
         <BrowserRouter>
