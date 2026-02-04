@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { formatDisplayName } from "@/lib/utils";
 
 interface Announcement {
@@ -111,7 +110,6 @@ export default function Dashboard() {
             <div className="mt-4 h-px w-24 bg-foreground/20" />
           </div>
           <div className="flex items-center gap-2">
-            <ThemeToggle />
           </div>
         </motion.div>
 

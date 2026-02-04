@@ -211,15 +211,18 @@ const Contact = () => {
       </section>
 
       {/* Map Section */}
-      <section className="h-96 bg-muted relative">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <MapPin className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">
-              Interactive map will be displayed here
-            </p>
-          </div>
-        </div>
+      <section className="h-[450px] bg-muted relative overflow-hidden">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3902.1643265104445!2d75.38760671113063!3d11.943058388235212!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba43c337b3890c9%3A0xdd3eea3419721646!2sDarul%20Hasanath%20Islamic%20College!5e0!3m2!1sen!2sin!4v1709540000000!5m2!1sen!2sin"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Darul Hasanath Islamic College Location"
+          className="grayscale hover:grayscale-0 transition-all duration-500"
+        ></iframe>
       </section>
     </PublicLayout>
   );

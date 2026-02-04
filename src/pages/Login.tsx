@@ -60,7 +60,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen w-full flex overflow-hidden">
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-background">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
           <Link to="/" className="flex items-center mb-8 sm:mb-12">
@@ -68,9 +68,9 @@ const Login = () => {
           </Link>
 
           <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Member Login</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Sign In</h1>
             <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-              Sign in with your admission number and password
+              Access your dashboard with your admission number
             </p>
           </div>
 
@@ -108,8 +108,8 @@ const Login = () => {
               </div>
             </div>
 
-            <Button type="submit" variant="gold" size="lg" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? "Signing in..." : <>Sign In <ArrowRight className="w-4 h-4" /></>}
+            <Button type="submit" variant="gold" size="lg" disabled={isSubmitting} className="w-full h-12 rounded-xl text-lg font-bold">
+              {isSubmitting ? "Signing in..." : <>Sign In <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" /></>}
             </Button>
           </form>
 

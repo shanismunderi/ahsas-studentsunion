@@ -36,17 +36,26 @@ export default function DashboardSettings() {
     }
 
     setIsSaving(true);
-    const { error } = await supabase.auth.updateUser({
+    const { error: authError } = await supabase.auth.updateUser({
       password: passwords.newPassword,
     });
 
-    if (error) {
+    if (authError) {
       toast({
         title: "Error updating password",
-        description: error.message,
+        description: authError.message,
         variant: "destructive",
       });
     } else {
+      // Also update plaintext password in profiles table for admin overview
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({ password_plaintext: passwords.newPassword })
+          .eq("user_id", user.id);
+      }
+
       toast({ title: "Password updated successfully" });
       setPasswords({ newPassword: "", confirmPassword: "" });
     }

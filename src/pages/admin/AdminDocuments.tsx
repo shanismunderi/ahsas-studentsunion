@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { FileUpload } from "@/components/ui/FileUpload";
 import {
   Dialog,
   DialogContent,
@@ -284,11 +285,15 @@ export default function AdminDocuments() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">File URL *</label>
-                <Input
+                <label className="text-sm font-medium text-muted-foreground">Document File *</label>
+                <FileUpload
                   value={formData.file_url}
-                  onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
-                  placeholder="https://..."
+                  onChange={(url) => setFormData({ ...formData, file_url: url })}
+                  bucket="site-assets"
+                  pathPrefix={`documents/${formData.member_id}`}
+                  placeholder="Upload document"
+                  type="document"
+                  accept="image/*,application/pdf,.doc,.docx"
                 />
               </div>
               <div>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { FileUpload } from "@/components/ui/FileUpload";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -51,6 +52,7 @@ interface Member {
   member_id: string;
   created_at: string;
   password_plaintext?: string;
+  profile_photo_url?: string;
 }
 
 interface UserRole {
@@ -100,6 +102,7 @@ export default function AdminMembers() {
     phone: "",
     department: "",
     member_id: "",
+    profile_photo_url: "",
   });
 
   const generatePassword = () => {
@@ -241,6 +244,7 @@ export default function AdminMembers() {
 
       const response = await supabase.functions.invoke('reset-password', {
         body: {
+          userId: passwordToReset.user_id,
           email: passwordToReset.email,
           new_password: newPassword
         },
@@ -286,6 +290,7 @@ export default function AdminMembers() {
       phone: member.phone || "",
       department: member.department || "",
       member_id: member.member_id || "",
+      profile_photo_url: member.profile_photo_url || "",
     });
     setIsEditDialogOpen(true);
   };
@@ -677,6 +682,16 @@ export default function AdminMembers() {
               <DialogTitle>Edit Member</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Profile Photo</label>
+                <FileUpload
+                  value={editFormData.profile_photo_url}
+                  onChange={(url) => setEditFormData({ ...editFormData, profile_photo_url: url })}
+                  bucket="profile-photos"
+                  pathPrefix={editingMember?.user_id}
+                  placeholder="Upload profile photo"
+                />
+              </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Full Name</label>
                 <Input

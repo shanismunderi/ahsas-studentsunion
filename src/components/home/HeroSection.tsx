@@ -15,14 +15,13 @@ export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0">
-        <img
-          src={hero_bg}
-          alt="Hero background"
-          className="w-full h-full object-cover"
-        />
+      {/* Background with parallax/fixed effect */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-fixed"
+        style={{ backgroundImage: `url(${hero_bg})` }}
+      >
         {/* Dark overlay with grain texture */}
-        <div className="absolute inset-0 bg-background/85" />
+        <div className="absolute inset-0 bg-background/90" />
         <div className="absolute inset-0 gradient-mesh opacity-50" />
       </div>
 
@@ -41,10 +40,6 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-foreground/10 text-foreground border border-foreground/20 text-xs sm:text-sm font-medium backdrop-blur-sm">
-              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-              Al Hasanath Students Association
-            </span>
           </motion.div>
 
           {/* Heading */}
@@ -92,8 +87,8 @@ export function HeroSection() {
               </Button>
             </Link>
             <Link to="/login" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 sm:h-14 text-base sm:text-lg">
-                Member Portal
+              <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 sm:h-14 text-base sm:text-lg border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 rounded-xl">
+                Sign In
               </Button>
             </Link>
           </motion.div>

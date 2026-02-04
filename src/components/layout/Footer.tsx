@@ -31,11 +31,11 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Brand */}
           <div className="space-y-6 sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="flex items-center gap-3">
-              <img src="/logo.png" alt="Ahsas Logo" className="w-12 h-12 object-contain" />
+            <Link to="/" className="flex items-center gap-4">
+              <img src="/logo.png" alt="Ahsas Logo" className="w-16 h-16 object-contain" />
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-foreground">AHSAs</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+                <span className="text-2xl font-bold text-foreground">AHSAs</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium">
                   Al Hasanath Students Association
                 </span>
               </div>
