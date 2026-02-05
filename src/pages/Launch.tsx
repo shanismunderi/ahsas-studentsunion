@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Rocket, Users, Trophy, Heart, Star, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "../assets/logo.png";
 
 const slides = [
   {
@@ -18,8 +19,8 @@ const slides = [
     id: 2,
     icon: Users,
     title: "A Community of",
-    highlight: "500+",
-    subtitle: "Active Members",
+    highlight: "400+",
+    subtitle: "Active Students",
     description: "United by passion, driven by purpose",
     gradient: "from-teal-400 via-emerald-400 to-cyan-400",
     bgGradient: "from-teal-500/20 via-emerald-500/10 to-transparent",
@@ -28,7 +29,7 @@ const slides = [
     id: 3,
     icon: Trophy,
     title: "Celebrating",
-    highlight: "150+",
+    highlight: "350+",
     subtitle: "Achievements",
     description: "Excellence in academics, sports & arts",
     gradient: "from-amber-400 via-orange-400 to-yellow-400",
@@ -130,7 +131,14 @@ export default function Launch() {
       setCurrentSlide((prev) => {
         if (prev >= slides.length - 1) {
           clearInterval(interval);
-          setTimeout(() => setShowEnter(true), 800);
+          // Auto redirect after last slide
+          setTimeout(() => {
+            setIsExiting(true);
+            localStorage.setItem("ahsas_launched", "true");
+            setTimeout(() => {
+              window.location.href = "/home";
+            }, 800);
+          }, 1000);
           return prev;
         }
         return prev + 1;
@@ -240,54 +248,32 @@ export default function Launch() {
               className="text-center mb-16 perspective-1000"
             >
               {/* Logo with multiple layers */}
-              <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-8">
+              <div className="relative w-40 h-40 sm:w-48 sm:h-48 mx-auto mb-8">
                 {/* Outer glow ring */}
                 <motion.div
-                  className="absolute inset-0 rounded-3xl"
-                  style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)` }}
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: `radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)` }}
                   animate={{
-                    boxShadow: [
-                      "0 0 30px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.2)",
-                      "0 0 50px hsl(var(--primary) / 0.5), 0 0 100px hsl(var(--primary) / 0.3)",
-                      "0 0 30px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.2)",
-                    ],
+                    opacity: [0.3, 0.6, 0.3],
+                    scale: [0.8, 1.2, 0.8],
                   }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  transition={{ duration: 3, repeat: Infinity }}
                 />
 
-                {/* Inner rotating gradient */}
+                {/* Logo Image */}
                 <motion.div
-                  className="absolute inset-1 rounded-[20px] overflow-hidden"
-                  style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)` }}
+                  className="relative z-10 w-full h-full flex items-center justify-center p-2"
+                  animate={{
+                    y: [0, -10, 0],
+                    rotateZ: [0, 2, -2, 0]
+                  }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <motion.div
-                    className="absolute inset-0"
-                    style={{
-                      background: `conic-gradient(from 0deg, transparent 0%, hsl(0 0% 100% / 0.3) 25%, transparent 50%)`,
-                    }}
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  <img
+                    src={logo}
+                    alt="AHSAS Logo"
+                    className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
                   />
-                </motion.div>
-
-                {/* Logo letter */}
-                <motion.div
-                  className="absolute inset-2 rounded-2xl flex items-center justify-center"
-                  style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.9) 100%)` }}
-                >
-                  <motion.span
-                    className="text-5xl sm:text-6xl font-bold text-primary-foreground"
-                    animate={{
-                      textShadow: [
-                        "0 0 20px hsl(0 0% 100% / 0.5)",
-                        "0 0 40px hsl(0 0% 100% / 0.8)",
-                        "0 0 20px hsl(0 0% 100% / 0.5)",
-                      ]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    A
-                  </motion.span>
                 </motion.div>
               </div>
 
@@ -297,6 +283,16 @@ export default function Launch() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
               >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6, duration: 0.8 }}
+                  className="mb-4"
+                >
+                  <p className="text-2xl sm:text-3xl md:text-4xl font-arabic text-primary drop-shadow-md font-bold" style={{ fontFamily: "'Traditional Arabic', serif" }}>
+                    إِنَّا فَتَحْنَا لَكَ فَتْحًا مُّبِينًا
+                  </p>
+                </motion.div>
                 <motion.h1
                   className="text-5xl sm:text-7xl font-bold mb-3 tracking-tight"
                   initial={{ y: 20, opacity: 0 }}
@@ -565,50 +561,7 @@ export default function Launch() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Premium Enter button */}
-            <AnimatePresence>
-              {showEnter && (
-                <motion.div
-                  initial={{ opacity: 0, y: 60, scale: 0.8 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-                  className="absolute bottom-16"
-                >
-                  <div className="relative">
-                    {/* Button glow */}
-                    <motion.div
-                      className="absolute -inset-3 rounded-2xl blur-xl"
-                      style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)` }}
-                      animate={{
-                        opacity: [0.4, 0.7, 0.4],
-                        scale: [0.95, 1.05, 0.95],
-                      }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
 
-                    <Button
-                      onClick={handleEnter}
-                      size="lg"
-                      className="relative h-14 sm:h-16 px-8 sm:px-12 text-base sm:text-lg rounded-xl overflow-hidden group"
-                    >
-                      <motion.span
-                        className="absolute inset-0"
-                        style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)` }}
-                      />
-                      <span className="relative flex items-center gap-3 text-primary-foreground font-semibold">
-                        Enter AHSAS
-                        <motion.span
-                          animate={{ x: [0, 5, 0] }}
-                          transition={{ duration: 1, repeat: Infinity }}
-                        >
-                          <ArrowRight className="w-5 h-5" />
-                        </motion.span>
-                      </span>
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
