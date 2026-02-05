@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Users, Trophy, Calendar, Star, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import hero_bg from "@/assets/hero_bg.png";
+import heroBg from "@/assets/hero-bg.jpg";
 
 const stats = [
   { icon: Users, value: "500+", label: "Active Members" },
@@ -15,20 +15,21 @@ export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background */}
-      {/* Background with parallax/fixed effect */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{ backgroundImage: `url(${hero_bg})` }}
-      >
+      <div className="absolute inset-0">
+        <img
+          src={heroBg}
+          alt="Hero background"
+          className="w-full h-full object-cover"
+        />
         {/* Dark overlay with grain texture */}
-        <div className="absolute inset-0 bg-background/90" />
+        <div className="absolute inset-0 bg-background/85" />
         <div className="absolute inset-0 gradient-mesh opacity-50" />
       </div>
 
       {/* Animated gradient orbs */}
       <div className="absolute top-1/4 right-10 w-32 md:w-96 h-32 md:h-96 bg-foreground/5 rounded-full blur-3xl animate-pulse-slow hidden sm:block" />
       <div className="absolute bottom-1/4 left-10 w-24 md:w-64 h-24 md:h-64 bg-foreground/3 rounded-full blur-3xl animate-pulse-slow hidden sm:block" />
-
+      
       {/* Grid pattern overlay */}
       <div className="absolute inset-0 pattern-dots opacity-30" />
 
@@ -40,6 +41,10 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
+            <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-foreground/10 text-foreground border border-foreground/20 text-xs sm:text-sm font-medium backdrop-blur-sm">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+              Al Hasanath Students Association
+            </span>
           </motion.div>
 
           {/* Heading */}
@@ -68,8 +73,8 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed"
           >
-            Join a vibrant community of passionate students dedicated to excellence,
-            leadership, and making a difference. Ahsas is more than an association —
+            Join a vibrant community of passionate students dedicated to excellence, 
+            leadership, and making a difference. Ahsas is more than an association — 
             it's a family.
           </motion.p>
 
@@ -87,8 +92,8 @@ export function HeroSection() {
               </Button>
             </Link>
             <Link to="/login" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 sm:h-14 text-base sm:text-lg border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 rounded-xl">
-                Sign In
+              <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 sm:h-14 text-base sm:text-lg">
+                Member Portal
               </Button>
             </Link>
           </motion.div>

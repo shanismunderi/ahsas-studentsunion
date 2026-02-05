@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { FileUpload } from "@/components/ui/FileUpload";
 import {
   Dialog,
   DialogContent,
@@ -229,15 +228,11 @@ export default function AdminAnnouncements() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Attachment</label>
-                <FileUpload
+                <label className="text-sm font-medium text-muted-foreground">Attachment URL</label>
+                <Input
                   value={formData.attachment_url}
-                  onChange={(url) => setFormData({ ...formData, attachment_url: url })}
-                  bucket="site-assets"
-                  pathPrefix="announcements"
-                  placeholder="Upload attachment"
-                  type="any"
-                  accept="image/*,application/pdf"
+                  onChange={(e) => setFormData({ ...formData, attachment_url: e.target.value })}
+                  placeholder="https://..."
                 />
               </div>
               <div className="flex justify-end gap-2 pt-4">

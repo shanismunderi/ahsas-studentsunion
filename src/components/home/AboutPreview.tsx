@@ -32,7 +32,7 @@ export function AboutPreview() {
       {/* Subtle background elements */}
       <div className="absolute inset-0 pattern-dots opacity-20" />
       <div className="absolute top-0 left-0 w-96 h-96 bg-foreground/3 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-
+      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
@@ -51,7 +51,7 @@ export function AboutPreview() {
             transition={{ delay: 0.1 }}
             className="mt-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight"
           >
-            AHSAs, More than an Union
+            A Legacy of Excellence
           </motion.h2>
           <motion.div
             initial={{ scaleX: 0 }}
@@ -81,7 +81,7 @@ export function AboutPreview() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               </div>
-
+              
               {/* Floating stat card */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -107,12 +107,14 @@ export function AboutPreview() {
             className="order-1 lg:order-2"
           >
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-              AHSA is the student union of Darul Hasanath Islamic College, dedicated to enhancing student life
-              through meaningful programs, academic support, cultural celebrations, and community initiatives.
+              Founded with a vision to empower students, Ahsas (Al Hasanath Students
+              Association) has grown into a vibrant community that fosters academic
+              excellence, leadership development, and lasting friendships.
             </p>
             <p className="mt-4 text-muted-foreground leading-relaxed">
-              With a focus on unity, leadership, and personal growth, AHSAS fosters an inclusive
-              environment where students can learn, lead, and make lasting memories together.
+              Our members are not just students — they are future leaders, innovators,
+              and changemakers who carry the values of integrity, collaboration, and
+              service wherever they go.
             </p>
 
             {/* Values Grid */}

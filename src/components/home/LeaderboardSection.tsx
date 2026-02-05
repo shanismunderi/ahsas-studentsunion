@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDisplayName } from "@/lib/utils";
 import {
   BarChart,
   Bar,
@@ -54,7 +53,7 @@ export function LeaderboardSection() {
   }
 
   const chartData = leaders.slice(0, 6).map((leader, index) => ({
-    name: formatDisplayName(leader.full_name),
+    name: leader.full_name.split(" ")[0],
     points: leader.total_points,
     fill: index < 3 ? RANK_COLORS[index] : "hsl(215 15% 35%)",
   }));
@@ -78,7 +77,7 @@ export function LeaderboardSection() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,215,0,0.1),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,215,0,0.05),transparent_50%)]" />
       </div>
-
+      
       {/* Decorative Elements */}
       <motion.div
         animate={{ y: [-20, 20, -20], rotate: [0, 5, 0] }}
@@ -110,7 +109,7 @@ export function LeaderboardSection() {
             <span>Achievement Leaderboard</span>
             <Sparkles className="w-4 h-4" />
           </motion.div>
-
+          
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
             Our <span className="text-gradient-gold">Top Achievers</span>
           </h2>
@@ -138,10 +137,11 @@ export function LeaderboardSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 + index * 0.1 }}
-              className={`text-center p-4 sm:p-6 rounded-2xl border transition-all duration-300 hover:shadow-lg ${stat.accent
-                ? "bg-gradient-to-br from-accent/10 to-gold-light/5 border-accent/30"
-                : "bg-card/50 border-border/50"
-                }`}
+              className={`text-center p-4 sm:p-6 rounded-2xl border transition-all duration-300 hover:shadow-lg ${
+                stat.accent 
+                  ? "bg-gradient-to-br from-accent/10 to-gold-light/5 border-accent/30" 
+                  : "bg-card/50 border-border/50"
+              }`}
             >
               <stat.icon className={`w-6 h-6 mx-auto mb-2 ${stat.accent ? "text-accent" : "text-muted-foreground"}`} />
               <p className={`text-2xl sm:text-3xl font-bold ${stat.accent ? "text-accent" : "text-foreground"}`}>
@@ -164,7 +164,7 @@ export function LeaderboardSection() {
             <Card className="relative overflow-hidden border-0 shadow-luxury bg-gradient-to-br from-card via-card to-accent/5">
               {/* Premium border effect */}
               <div className="absolute inset-0 rounded-lg p-[1px] bg-gradient-to-br from-accent/50 via-transparent to-accent/30 -z-10" />
-
+              
               <CardContent className="relative p-6 sm:p-10">
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-10">
@@ -189,7 +189,7 @@ export function LeaderboardSection() {
                       delay={0.5}
                     />
                   )}
-
+                  
                   {/* 1st Place */}
                   {leaders.length >= 1 && (
                     <PodiumItem
@@ -198,7 +198,7 @@ export function LeaderboardSection() {
                       delay={0.4}
                     />
                   )}
-
+                  
                   {/* 3rd Place */}
                   {leaders.length >= 3 && (
                     <PodiumItem
@@ -237,9 +237,9 @@ export function LeaderboardSection() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} layout="vertical">
                       <XAxis type="number" hide />
-                      <YAxis
-                        type="category"
-                        dataKey="name"
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
                         width={50}
                         tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                         axisLine={false}
@@ -256,8 +256,8 @@ export function LeaderboardSection() {
                         cursor={{ fill: 'hsl(var(--muted) / 0.3)' }}
                         formatter={(value: number) => [`${value} pts`, 'Score']}
                       />
-                      <Bar
-                        dataKey="points"
+                      <Bar 
+                        dataKey="points" 
                         radius={[0, 8, 8, 0]}
                         barSize={20}
                       >
@@ -278,14 +278,16 @@ export function LeaderboardSection() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 * index }}
-                        className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 hover:bg-primary/10 cursor-pointer ${index < 3 ? 'bg-primary/5' : ''
-                          }`}
+                        className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 hover:bg-primary/10 cursor-pointer ${
+                          index < 3 ? 'bg-primary/5' : ''
+                        }`}
                       >
-                        <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${index === 0 ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground' :
+                        <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
+                          index === 0 ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground' :
                           index === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-500 text-white' :
-                            index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-white' :
-                              'bg-muted text-muted-foreground'
-                          }`}>
+                          index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-white' :
+                          'bg-muted text-muted-foreground'
+                        }`}>
                           {index + 1}
                         </span>
                         <Avatar className="w-9 h-9 border-2 border-border">
@@ -331,13 +333,13 @@ function PodiumItem({
   const RankIcon = RANK_ICONS[rank - 1];
   const color = RANK_COLORS[rank - 1];
   const label = RANK_LABELS[rank - 1];
-
+  
   const heights = {
     1: "h-44 sm:h-52",
     2: "h-32 sm:h-40",
     3: "h-24 sm:h-32",
   };
-
+  
   const avatarSizes = {
     1: "w-24 h-24 sm:w-28 sm:h-28",
     2: "w-18 h-18 sm:w-20 sm:h-20",
@@ -368,53 +370,53 @@ function PodiumItem({
             whileHover={{ scale: 1.05, y: -5 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <Avatar
-              className={`${avatarSizes[rank as keyof typeof avatarSizes]} border-4 shadow-xl transition-shadow group-hover:shadow-2xl`}
+            <Avatar 
+              className={`${avatarSizes[rank as keyof typeof avatarSizes]} border-4 shadow-xl transition-shadow group-hover:shadow-2xl`} 
               style={{ borderColor: color }}
             >
               <AvatarImage src={member.profile_photo_url || undefined} />
-              <AvatarFallback
+              <AvatarFallback 
                 className="text-xl sm:text-2xl font-bold bg-gradient-to-br from-primary/20 to-primary/10 text-primary"
               >
                 {getInitials(member.full_name)}
               </AvatarFallback>
             </Avatar>
           </motion.div>
-
+          
           {/* Rank Badge */}
-          <motion.div
+          <motion.div 
             initial={{ scale: 0, rotate: -180 }}
             whileInView={{ scale: 1, rotate: 0 }}
             viewport={{ once: true }}
             transition={{ delay: delay + 0.2, type: "spring", stiffness: 200 }}
             className="absolute -bottom-2 -right-2 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg"
-            style={{
+            style={{ 
               background: `linear-gradient(135deg, ${color}, ${color}dd)`,
             }}
           >
             <RankIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </motion.div>
         </div>
-
+        
         {/* Name */}
         <p className="text-sm sm:text-base font-bold text-foreground text-center max-w-24 sm:max-w-28 truncate mb-1 group-hover:text-primary transition-colors">
-          {formatDisplayName(member.full_name)}
+          {member.full_name.split(" ")[0]}
         </p>
-
+        
         {/* Podium */}
-        <motion.div
+        <motion.div 
           initial={{ height: 0 }}
           whileInView={{ height: "auto" }}
           viewport={{ once: true }}
           transition={{ delay: delay + 0.1, duration: 0.5, ease: "easeOut" }}
           className={`${heights[rank as keyof typeof heights]} w-24 sm:w-32 mt-3 rounded-t-2xl flex flex-col items-center justify-start pt-4 relative overflow-hidden`}
-          style={{
+          style={{ 
             background: `linear-gradient(180deg, ${color} 0%, ${color}88 100%)`,
           }}
         >
           {/* Shimmer effect */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer" />
-
+          
           <span className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg">{rank}</span>
           <div className="flex items-center gap-1 text-white/90 mt-2 px-3 py-1 rounded-full bg-white/20">
             <Star className="w-3.5 h-3.5" />

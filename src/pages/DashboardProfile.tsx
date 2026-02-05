@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Phone, MapPin, Calendar, Building, Save } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar, Building, Save, Camera, Loader2 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,19 +9,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileUpload } from "@/components/ui/FileUpload";
 
 export default function DashboardProfile() {
   const { user, profile, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || "",
     phone: profile?.phone || "",
     address: profile?.address || "",
     department: profile?.department || "",
-    profile_photo_url: profile?.profile_photo_url || "",
   });
 
   const handleSave = async () => {
@@ -47,7 +47,70 @@ export default function DashboardProfile() {
     setIsSaving(false);
   };
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user?.id || !profile?.id) return;
 
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from("profile-photos")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from("profile-photos")
+        .getPublicUrl(fileName);
+
+      // Update profile with new photo URL
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ profile_photo_url: `${publicUrl}?t=${Date.now()}` })
+        .eq("id", profile.id);
+
+      if (updateError) throw updateError;
+
+      await refreshProfile();
+      toast({ title: "Profile photo updated successfully" });
+    } catch (error: any) {
+      toast({
+        title: "Error uploading photo",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   const getInitials = (name?: string) => {
     if (!name) return "U";
@@ -116,36 +179,48 @@ export default function DashboardProfile() {
             <CardContent className="space-y-6">
               {/* Profile Picture */}
               <div className="flex flex-col sm:flex-row items-center gap-6">
-                {isEditing ? (
-                  <div className="w-full sm:w-auto">
-                    <FileUpload
-                      value={formData.profile_photo_url}
-                      onChange={(url) => setFormData({ ...formData, profile_photo_url: url })}
-                      bucket="profile-photos"
-                      pathPrefix={profile?.user_id}
-                      placeholder="Upload profile photo"
-                      type="image"
-                      className="w-full sm:w-64"
-                    />
-                  </div>
-                ) : (
-                  <>
-                    <div className="relative group">
-                      <Avatar className="w-24 h-24 sm:w-28 sm:h-28">
-                        <AvatarImage src={profile?.profile_photo_url || ""} />
-                        <AvatarFallback className="bg-accent/10 text-accent text-2xl sm:text-3xl font-semibold">
-                          {getInitials(profile?.full_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="text-center sm:text-left">
-                      <h3 className="font-semibold text-foreground text-lg">
-                        {profile?.full_name}
-                      </h3>
-                      <p className="text-muted-foreground text-sm">{profile?.email}</p>
-                    </div>
-                  </>
-                )}
+                <div className="relative group">
+                  <Avatar className="w-24 h-24 sm:w-28 sm:h-28">
+                    <AvatarImage src={profile?.profile_photo_url || ""} />
+                    <AvatarFallback className="bg-accent/10 text-accent text-2xl sm:text-3xl font-semibold">
+                      {getInitials(profile?.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    ) : (
+                      <Camera className="w-6 h-6 text-white" />
+                    )}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                </div>
+                <div className="text-center sm:text-left">
+                  <h3 className="font-semibold text-foreground text-lg">
+                    {profile?.full_name}
+                  </h3>
+                  <p className="text-muted-foreground text-sm">{profile?.email}</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-2 text-accent hover:text-accent"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    {isUploading ? "Uploading..." : "Change Photo"}
+                  </Button>
+                </div>
               </div>
 
               {/* Fields */}
@@ -160,7 +235,7 @@ export default function DashboardProfile() {
                       <Input
                         value={formData[field.key as keyof typeof formData] || ""}
                         onChange={(e) =>
-                          setFormData({ ...formData, [field.key]: e.target.value } as any)
+                          setFormData({ ...formData, [field.key]: e.target.value })
                         }
                         placeholder={`Enter ${field.label.toLowerCase()}`}
                       />

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, ArrowUpRight } from "lucide-react";
+import { GraduationCap, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, ArrowUpRight } from "lucide-react";
 
 const quickLinks = [
   { name: "Home", href: "/" },
@@ -17,9 +17,9 @@ const memberLinks = [
 ];
 
 const socialLinks = [
-  { icon: Instagram, href: "https://instagram.com/dhic_ahsas", label: "Instagram" },
   { icon: Facebook, href: "#", label: "Facebook" },
   { icon: Twitter, href: "#", label: "Twitter" },
+  { icon: Instagram, href: "#", label: "Instagram" },
   { icon: Linkedin, href: "#", label: "LinkedIn" },
 ];
 
@@ -31,17 +31,19 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Brand */}
           <div className="space-y-6 sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="flex items-center gap-4">
-              <img src="/logo.png" alt="Ahsas Logo" className="w-16 h-16 object-contain" />
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-12 h-12 rounded-xl bg-foreground/10 flex items-center justify-center group-hover:bg-foreground/15 transition-colors">
+                <GraduationCap className="w-6 h-6 text-foreground" />
+              </div>
               <div className="flex flex-col">
-                <span className="text-2xl font-bold text-foreground">AHSAs</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium">
-                  Al Hasanath Students Association
+                <span className="text-xl font-bold text-foreground">Ahsas</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+                  Students Association
                 </span>
               </div>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Al Hasanath Students Association - Empowering students through community,
+              Al Hasanath Students Association - Empowering students through community, 
               leadership, and excellence since establishment.
             </p>
             <div className="flex gap-2">
@@ -102,25 +104,24 @@ export function Footer() {
                 <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
                   <MapPin className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <span className="text-sm text-muted-foreground leading-relaxed">
-                  Darul Hasanath Islamic College, Kannadiparamba,<br />
-                  Niduvat, P.O Narath, Kannur, Kerala - 670601
+                <span className="text-sm text-muted-foreground">
+                  Al Hasanath Campus, Main Road<br />City, State - 123456
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
                   <Phone className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <a href="tel:+916238781368" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  +91 6238 781 368
+                <a href="tel:+1234567890" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  +1 234 567 890
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
                   <Mail className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <a href="mailto:dhicahsas@gmail.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  dhicahsas@gmail.com
+                <a href="mailto:contact@ahsas.org" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  contact@ahsas.org
                 </a>
               </li>
             </ul>
@@ -133,7 +134,7 @@ export function Footer() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-xs text-muted-foreground text-center sm:text-left">
-              © {new Date().getFullYear()} AHSAs - Al Hasanath Students Association. All rights reserved.
+              © {new Date().getFullYear()} Ahsas - Al Hasanath Students Association. All rights reserved.
             </p>
             <div className="flex gap-6">
               <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">

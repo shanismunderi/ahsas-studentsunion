@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { FileUpload } from "@/components/ui/FileUpload";
 import {
   Dialog,
   DialogContent,
@@ -176,13 +175,11 @@ export default function AdminGallery() {
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Image *</label>
-                <FileUpload
+                <label className="text-sm font-medium text-muted-foreground">Image URL *</label>
+                <Input
                   value={formData.image_url}
-                  onChange={(url) => setFormData({ ...formData, image_url: url })}
-                  bucket="site-assets"
-                  pathPrefix="gallery"
-                  placeholder="Upload gallery photo"
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  placeholder="https://..."
                 />
               </div>
               <div>

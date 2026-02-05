@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { FileUpload } from "@/components/ui/FileUpload";
 import {
   Dialog,
   DialogContent,
@@ -254,8 +253,9 @@ export default function AdminPosts() {
                       <TableCell>
                         <button
                           onClick={() => togglePublish(p)}
-                          className={`flex items-center gap-1 text-xs ${p.is_published ? "text-green-600" : "text-muted-foreground"
-                            }`}
+                          className={`flex items-center gap-1 text-xs ${
+                            p.is_published ? "text-green-600" : "text-muted-foreground"
+                          }`}
                         >
                           {p.is_published ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                           {p.is_published ? "Published" : "Draft"}
@@ -342,13 +342,11 @@ export default function AdminPosts() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Cover Image</label>
-                <FileUpload
+                <label className="text-sm font-medium text-muted-foreground">Cover Image URL</label>
+                <Input
                   value={formData.cover_image_url}
-                  onChange={(url) => setFormData({ ...formData, cover_image_url: url })}
-                  bucket="site-assets"
-                  pathPrefix="posts"
-                  placeholder="Upload cover image"
+                  onChange={(e) => setFormData({ ...formData, cover_image_url: e.target.value })}
+                  placeholder="https://..."
                 />
               </div>
               <div>

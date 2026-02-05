@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-
+    
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { autoRefreshToken: false, persistSession: false }
     })
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
 
     const token = authHeader.replace('Bearer ', '')
     const { data: { user: requestingUser }, error: authError } = await supabaseAdmin.auth.getUser(token)
-
+    
     if (authError || !requestingUser) {
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
@@ -79,19 +79,18 @@ Deno.serve(async (req) => {
     if (newUser.user) {
       await supabaseAdmin
         .from('profiles')
-        .update({
-          member_id,
-          phone,
+        .update({ 
+          member_id, 
+          phone, 
           department,
-          full_name,
-          password_plaintext: password
+          full_name 
         })
         .eq('user_id', newUser.user.id)
     }
 
-    return new Response(JSON.stringify({
-      success: true,
-      user: { id: newUser.user?.id, email: newUser.user?.email }
+    return new Response(JSON.stringify({ 
+      success: true, 
+      user: { id: newUser.user?.id, email: newUser.user?.email } 
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

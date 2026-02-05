@@ -11,100 +11,57 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
+    const { email, new_password } = await req.json();
 
-    // Verify the requesting user is an admin
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'No authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user: requestingUser }, error: authError } = await supabaseAdmin.auth.getUser(token)
-
-    if (authError || !requestingUser) {
-      return new Response(JSON.stringify({ error: 'Invalid token' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-
-    // Check if requesting user is admin
-    const { data: roleData } = await supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', requestingUser.id)
-      .single()
-
-    if (!roleData || roleData.role !== 'admin') {
-      return new Response(JSON.stringify({ error: 'Unauthorized - Admin access required' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-
-    const { email, userId, new_password } = await req.json();
-
-    if (!new_password || (!email && !userId)) {
+    if (!email || !new_password) {
       return new Response(
-        JSON.stringify({ error: "New password and either email or userId are required" }),
+        JSON.stringify({ error: "Email and new_password are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    let targetUserId = userId;
-
-    // If userId not provided, find user by email
-    if (!targetUserId && email) {
-      const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-      if (listError) {
-        throw new Error("Failed to list users: " + listError.message);
-      }
-      const user = users.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
-      if (!user) {
-        return new Response(
-          JSON.stringify({ error: `User with email ${email} not found` }),
-          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      targetUserId = user.id;
-    }
-
-    // Update user password in Auth
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      targetUserId,
-      { password: new_password }
-    );
-
-    if (updateError) {
-      console.error("Error updating auth password:", updateError);
+    // Get user by email
+    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (listError) {
+      console.error("Error listing users:", listError);
       return new Response(
-        JSON.stringify({ error: `Failed to update auth password: ${updateError.message}` }),
+        JSON.stringify({ error: "Failed to find user" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Update profiles table with new plaintext password
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .update({ password_plaintext: new_password })
-      .eq('user_id', targetUserId);
-
-    if (profileError) {
-      console.error("Error updating profile password:", profileError);
-      // We don't return error here because the Auth password was already updated
+    const user = users.users.find(u => u.email === email);
+    
+    if (!user) {
+      return new Response(
+        JSON.stringify({ error: "User not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    console.log(`Password reset successfully for user ${targetUserId}`);
+    // Update user password
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      user.id,
+      { password: new_password }
+    );
 
+    if (updateError) {
+      console.error("Error updating password:", updateError);
+      return new Response(
+        JSON.stringify({ error: "Failed to update password" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`Password reset successfully for ${email}`);
+    
     return new Response(
       JSON.stringify({ success: true, message: "Password updated successfully" }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -119,5 +76,3 @@ Deno.serve(async (req) => {
     );
   }
 });
-
-

@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "next-themes";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
+import Launch from "./pages/Launch";
 import About from "./pages/About";
 import News from "./pages/News";
 import Blog from "./pages/Blog";
@@ -28,22 +29,21 @@ import AdminPosts from "./pages/admin/AdminPosts";
 import AdminGallery from "./pages/admin/AdminGallery";
 import AdminSettings from "./pages/admin/AdminSettings";
 import MemberProfile from "./pages/MemberProfile";
-import { SiteIntro } from "./components/layout/SiteIntro";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
-        <SiteIntro />
         <Toaster />
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
             <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Index />} />
+            {/* Public Routes */}
+              <Route path="/" element={<Launch />} />
+              <Route path="/home" element={<Index />} />
               <Route path="/about" element={<About />} />
               <Route path="/news" element={<News />} />
               <Route path="/blog" element={<Blog />} />

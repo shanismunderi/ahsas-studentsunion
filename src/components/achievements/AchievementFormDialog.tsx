@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Trophy, Upload, X, Award, Sparkles,
+import { 
+  Trophy, Upload, X, Award, Sparkles, 
   Calendar, FileText, Star, Check, Loader2,
   Zap, Crown, Target, Gem, Medal, Building
 } from "lucide-react";
@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FileUpload } from "@/components/ui/FileUpload";
 
 interface AchievementFormDialogProps {
   open: boolean;
@@ -58,9 +57,11 @@ export function AchievementFormDialog({
     file_url: "",
     conducted_by: "",
   });
+  const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset form when dialog opens/closes or editing changes
   useEffect(() => {
@@ -83,6 +84,46 @@ export function AchievementFormDialog({
 
   const selectedCategory = CATEGORIES.find(c => c.value === formData.category);
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Please upload an image or PDF file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('achievement-certificates')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('achievement-certificates')
+        .getPublicUrl(fileName);
+
+      setFormData(prev => ({ ...prev, file_url: publicUrl }));
+      setUploadedFileName(file.name);
+      toast.success("Certificate uploaded successfully");
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error("Failed to upload certificate");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
@@ -248,20 +289,22 @@ export function AchievementFormDialog({
                       else if (step === 2 && canProceedToStep2) setCurrentStep(2);
                       else if (step === 3 && canProceedToStep2 && canProceedToStep3) setCurrentStep(3);
                     }}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${currentStep === step
-                      ? "bg-accent text-accent-foreground scale-110 shadow-gold"
-                      : currentStep > step
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                      currentStep === step
+                        ? "bg-accent text-accent-foreground scale-110 shadow-gold"
+                        : currentStep > step
                         ? "bg-accent/30 text-accent"
                         : "bg-white/10 text-white/50"
-                      }`}
+                    }`}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     {currentStep > step ? <Check className="w-5 h-5" /> : step}
                   </motion.button>
                   {step < 3 && (
-                    <div className={`w-12 sm:w-20 h-1 mx-2 rounded-full transition-colors duration-300 ${currentStep > step ? "bg-accent/50" : "bg-white/10"
-                      }`} />
+                    <div className={`w-12 sm:w-20 h-1 mx-2 rounded-full transition-colors duration-300 ${
+                      currentStep > step ? "bg-accent/50" : "bg-white/10"
+                    }`} />
                   )}
                 </div>
               ))}
@@ -307,15 +350,16 @@ export function AchievementFormDialog({
                         setFormData({ ...formData, category: cat.value });
                         setTimeout(() => setCurrentStep(2), 300);
                       }}
-                      className={`relative p-4 sm:p-5 rounded-2xl border-2 transition-all duration-300 text-center group overflow-hidden ${formData.category === cat.value
-                        ? "border-accent bg-accent/10 shadow-gold"
-                        : "border-border/50 bg-card hover:border-accent/50 hover:shadow-lg"
-                        }`}
+                      className={`relative p-4 sm:p-5 rounded-2xl border-2 transition-all duration-300 text-center group overflow-hidden ${
+                        formData.category === cat.value
+                          ? "border-accent bg-accent/10 shadow-gold"
+                          : "border-border/50 bg-card hover:border-accent/50 hover:shadow-lg"
+                      }`}
                     >
                       {/* Gradient overlay on hover */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-
-                      <motion.span
+                      
+                      <motion.span 
                         className="text-4xl sm:text-5xl block mb-3"
                         whileHover={{ scale: 1.2, rotate: [0, -10, 10, 0] }}
                         transition={{ duration: 0.4 }}
@@ -325,7 +369,7 @@ export function AchievementFormDialog({
                       <span className="text-xs sm:text-sm font-semibold text-foreground block">
                         {cat.label}
                       </span>
-
+                      
                       {formData.category === cat.value && (
                         <motion.div
                           initial={{ scale: 0 }}
@@ -582,18 +626,84 @@ export function AchievementFormDialog({
                   transition={{ delay: 0.1 }}
                   className="space-y-3"
                 >
-                  <FileUpload
-                    value={formData.file_url}
-                    onChange={(url) => {
-                      setFormData({ ...formData, file_url: url });
-                      setUploadedFileName(url.split('/').pop() || "Certificate");
-                    }}
-                    bucket="achievement-certificates"
-                    pathPrefix={userId}
-                    placeholder="Upload certificate or photo"
-                    type="any"
-                    accept="image/*,application/pdf"
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={handleFileUpload}
+                    className="hidden"
                   />
+                  
+                  <AnimatePresence mode="wait">
+                    {formData.file_url ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="relative p-5 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border-2 border-green-500/30 flex items-center gap-4"
+                      >
+                        <div className="w-16 h-16 rounded-xl bg-green-500/20 flex items-center justify-center">
+                          <Check className="w-8 h-8 text-green-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-foreground truncate">
+                            {uploadedFileName || "Certificate uploaded"}
+                          </p>
+                          <a 
+                            href={formData.file_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-sm text-green-600 hover:underline inline-flex items-center gap-1 mt-1"
+                          >
+                            <FileText className="w-4 h-4" />
+                            View certificate
+                          </a>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-10 w-10 hover:bg-red-500/10 hover:text-red-500"
+                          onClick={() => {
+                            setFormData({ ...formData, file_url: "" });
+                            setUploadedFileName("");
+                          }}
+                        >
+                          <X className="w-5 h-5" />
+                        </Button>
+                      </motion.div>
+                    ) : (
+                      <motion.button
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="w-full p-8 sm:p-10 rounded-2xl border-2 border-dashed border-accent/30 bg-gradient-to-br from-accent/5 to-transparent hover:border-accent/50 hover:bg-accent/5 transition-all duration-300 flex flex-col items-center gap-4 group"
+                      >
+                        <motion.div
+                          animate={isUploading ? { rotate: 360 } : {}}
+                          transition={{ duration: 1, repeat: isUploading ? Infinity : 0, ease: "linear" }}
+                          className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform"
+                        >
+                          {isUploading ? (
+                            <Loader2 className="w-8 h-8 text-accent" />
+                          ) : (
+                            <Upload className="w-8 h-8 text-accent" />
+                          )}
+                        </motion.div>
+                        <div className="text-center">
+                          <p className="font-semibold text-foreground text-lg">
+                            {isUploading ? "Uploading..." : "Click to upload certificate"}
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            PNG, JPG, WebP or PDF (max 5MB)
+                          </p>
+                        </div>
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
 
                 {/* Info Box */}
@@ -610,7 +720,7 @@ export function AchievementFormDialog({
                     <div>
                       <p className="font-semibold text-foreground">What happens next?</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Your achievement will be reviewed by an admin. Once approved, you'll earn points
+                        Your achievement will be reviewed by an admin. Once approved, you'll earn points 
                         that contribute to your ranking on the leaderboard. You'll be notified of the decision.
                       </p>
                     </div>

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, GraduationCap, LogIn } from "lucide-react";
+import { Menu, X, GraduationCap, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn, formatDisplayName } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { SignOutDialog } from "@/components/SignOutDialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -17,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navLinks = [
-  { name: "Home", href: "/" },
+  { name: "Home", href: "/home" },
   { name: "About", href: "/about" },
   { name: "News & Events", href: "/news" },
   { name: "Blog", href: "/blog" },
@@ -47,7 +48,7 @@ export function Navbar() {
   }, [location]);
 
   const isActive = (href: string) => {
-    if (href === "/") return location.pathname === "/";
+    if (href === "/home") return location.pathname === "/home" || location.pathname === "/";
     return location.pathname.startsWith(href);
   };
 
@@ -60,7 +61,7 @@ export function Navbar() {
         title: "Signed out successfully",
         description: "See you next time!",
       });
-      navigate("/");
+      navigate("/home");
     } catch (error) {
       toast({
         title: "Error signing out",
@@ -100,13 +101,17 @@ export function Navbar() {
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-4 group flex-shrink-0">
-              <div className="relative w-14 h-24 lg:w-16 lg:h-16 flex items-center justify-center transition-transform group-hover:scale-105">
-                <img
-                  src="/logo.png"
-                  alt="AHSAS Logo"
-                  className="w-full h-full object-contain filter drop-shadow-sm"
-                />
+            <Link to="/home" className="flex items-center gap-3 group flex-shrink-0">
+              <div className="w-10 h-10 lg:w-11 lg:h-11 rounded-xl bg-foreground flex items-center justify-center">
+                <GraduationCap className="w-5 h-5 lg:w-6 lg:h-6 text-background" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-lg lg:text-xl font-bold text-foreground tracking-tight">
+                  Ahsas
+                </span>
+                <span className="text-[8px] lg:text-[9px] text-muted-foreground font-medium uppercase tracking-[0.15em] hidden sm:block">
+                  Students Association
+                </span>
               </div>
             </Link>
 
@@ -130,6 +135,7 @@ export function Navbar() {
 
             {/* CTA Buttons / User Menu */}
             <div className="hidden lg:flex items-center gap-3">
+              <ThemeToggle />
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -144,7 +150,7 @@ export function Navbar() {
                         </AvatarFallback>
                       </Avatar>
                       <span className="font-medium text-sm max-w-[120px] truncate">
-                        {formatDisplayName(profile?.full_name) || user.email?.split("@")[0]}
+                        {profile?.full_name || user.email?.split("@")[0]}
                       </span>
                       <ChevronDown className="w-4 h-4 text-muted-foreground" />
                     </Button>
@@ -180,21 +186,24 @@ export function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link to="/login">
-                  <Button className="relative group px-8 h-11 bg-gradient-to-r from-primary to-accent text-white overflow-hidden rounded-full shadow-[0_0_20px_hsl(var(--primary)/0.3)] hover:shadow-[0_0_30px_hsl(var(--primary)/0.5)] transition-all duration-300 border-none group">
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
-                    />
-                    <span className="relative flex items-center gap-2 font-bold tracking-tight">
-                      <LogIn className="w-4 h-4 transition-transform group-hover:scale-110" />
+                <>
+                  <Link to="/login">
+                    <Button variant="ghost" size="sm">
                       Sign In
-                    </span>
-                  </Button>
-                </Link>
+                    </Button>
+                  </Link>
+                  <Link to="/login">
+                    <Button size="sm">
+                      Join Ahsas
+                    </Button>
+                  </Link>
+                </>
               )}
             </div>
 
+            {/* Mobile Menu Button */}
             <div className="flex items-center gap-2 lg:hidden">
+              <ThemeToggle />
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="p-2 rounded-lg hover:bg-secondary transition-colors"
@@ -244,7 +253,7 @@ export function Navbar() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0 flex-1">
-                            <p className="font-medium text-sm truncate">{formatDisplayName(profile?.full_name)}</p>
+                            <p className="font-medium text-sm truncate">{profile?.full_name}</p>
                             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                           </div>
                         </div>
@@ -264,12 +273,18 @@ export function Navbar() {
                         </Button>
                       </>
                     ) : (
-                      <Link to="/login" className="block">
-                        <Button className="w-full h-12 flex items-center justify-center gap-2 font-bold tracking-tight rounded-xl bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:shadow-primary/30 transition-all duration-300 border-none">
-                          <LogIn className="w-5 h-5" />
-                          Sign In
-                        </Button>
-                      </Link>
+                      <>
+                        <Link to="/login" className="block">
+                          <Button variant="outline" className="w-full h-11">
+                            Sign In
+                          </Button>
+                        </Link>
+                        <Link to="/login" className="block">
+                          <Button className="w-full h-11">
+                            Join Ahsas
+                          </Button>
+                        </Link>
+                      </>
                     )}
                   </div>
                 </div>

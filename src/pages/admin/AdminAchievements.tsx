@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Trophy, Plus, Trash2, Edit, Search, CheckCircle2, XCircle,
-  Clock, Star, FileText, MessageSquare, Filter, Eye
+import { 
+  Trophy, Plus, Trash2, Edit, Search, CheckCircle2, XCircle, 
+  Clock, Star, FileText, MessageSquare, Filter, Eye 
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { FileUpload } from "@/components/ui/FileUpload";
 import {
   Dialog,
   DialogContent,
@@ -280,7 +279,7 @@ export default function AdminAchievements() {
   };
 
   const filtered = achievements.filter((a) => {
-    const matchesSearch =
+    const matchesSearch = 
       a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || a.status === statusFilter;
@@ -439,9 +438,9 @@ export default function AdminAchievements() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           {a.status === 'pending' && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
                               onClick={() => openReviewDialog(a)}
                               className="text-accent hover:text-accent"
                             >
@@ -560,15 +559,11 @@ export default function AdminAchievements() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Certificate / Image</label>
-                <FileUpload
+                <label className="text-sm font-medium text-muted-foreground">Certificate URL</label>
+                <Input
                   value={formData.file_url}
-                  onChange={(url) => setFormData({ ...formData, file_url: url })}
-                  bucket="achievement-certificates"
-                  pathPrefix={formData.member_id}
-                  placeholder="Upload certificate or photo"
-                  type="any"
-                  accept="image/*,application/pdf"
+                  onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
+                  placeholder="https://..."
                 />
               </div>
               <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
@@ -590,7 +585,7 @@ export default function AdminAchievements() {
                 Review Achievement
               </DialogTitle>
             </DialogHeader>
-
+            
             {reviewingAchievement && (
               <div className="space-y-6 pt-4">
                 {/* Achievement Details */}
@@ -608,9 +603,9 @@ export default function AdminAchievements() {
                     <p className="text-sm text-muted-foreground mt-3">{reviewingAchievement.description}</p>
                   )}
                   {reviewingAchievement.file_url && (
-                    <a
-                      href={reviewingAchievement.file_url}
-                      target="_blank"
+                    <a 
+                      href={reviewingAchievement.file_url} 
+                      target="_blank" 
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-sm text-accent hover:underline mt-3"
                     >

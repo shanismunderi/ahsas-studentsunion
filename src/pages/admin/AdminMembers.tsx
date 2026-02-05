@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Plus, Trash2, Edit, Search, UserPlus, Mail, Lock, Phone, Building, IdCard, Eye, EyeOff, Copy, Check, FileSpreadsheet, Key } from "lucide-react";
+import { Users, Plus, Trash2, Edit, Search, UserPlus, Mail, Lock, Phone, Building, IdCard, Eye, EyeOff, Copy, Check, FileSpreadsheet } from "lucide-react";
 import { ExcelImportDialog } from "@/components/admin/ExcelImportDialog";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { FileUpload } from "@/components/ui/FileUpload";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -51,8 +50,6 @@ interface Member {
   department: string;
   member_id: string;
   created_at: string;
-  password_plaintext?: string;
-  profile_photo_url?: string;
 }
 
 interface UserRole {
@@ -73,21 +70,10 @@ export default function AdminMembers() {
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-  const [passwordToReset, setPasswordToReset] = useState<Member | null>(null);
-  const [newPassword, setNewPassword] = useState("");
-
-  const togglePasswordVisibility = (memberId: string) => {
-    setVisiblePasswords(prev => ({
-      ...prev,
-      [memberId]: !prev[memberId]
-    }));
-  };
-
+  
   const [createFormData, setCreateFormData] = useState({
     full_name: "",
     email: "",
@@ -102,7 +88,6 @@ export default function AdminMembers() {
     phone: "",
     department: "",
     member_id: "",
-    profile_photo_url: "",
   });
 
   const generatePassword = () => {
@@ -159,7 +144,7 @@ export default function AdminMembers() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-
+      
       const response = await supabase.functions.invoke('create-member', {
         body: createFormData,
         headers: {
@@ -178,7 +163,7 @@ export default function AdminMembers() {
       setCreatedCredentials({ email: createFormData.email, password: createFormData.password });
       toast({ title: "Member created successfully!" });
       fetchMembers();
-
+      
     } catch (error: any) {
       toast({ title: "Error creating member", description: error.message, variant: "destructive" });
     } finally {
@@ -212,7 +197,7 @@ export default function AdminMembers() {
     setIsSubmitting(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-
+      
       const response = await supabase.functions.invoke('delete-member', {
         body: { user_id: memberToDelete.user_id },
         headers: {
@@ -232,40 +217,6 @@ export default function AdminMembers() {
       setIsSubmitting(false);
       setDeleteConfirmOpen(false);
       setMemberToDelete(null);
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!passwordToReset || !newPassword) return;
-
-    setIsSubmitting(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      const response = await supabase.functions.invoke('reset-password', {
-        body: {
-          userId: passwordToReset.user_id,
-          email: passwordToReset.email,
-          new_password: newPassword
-        },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        }
-      });
-
-      if (response.error || response.data?.error) {
-        throw new Error(response.data?.error || response.error?.message);
-      }
-
-      toast({ title: "Password updated successfully" });
-      setIsPasswordDialogOpen(false);
-      setNewPassword("");
-      setPasswordToReset(null);
-      fetchMembers();
-    } catch (error: any) {
-      toast({ title: "Error resetting password", description: error.message, variant: "destructive" });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -290,7 +241,6 @@ export default function AdminMembers() {
       phone: member.phone || "",
       department: member.department || "",
       member_id: member.member_id || "",
-      profile_photo_url: member.profile_photo_url || "",
     });
     setIsEditDialogOpen(true);
   };
@@ -404,7 +354,6 @@ export default function AdminMembers() {
                   <TableHead>Member</TableHead>
                   <TableHead>Member ID</TableHead>
                   <TableHead>Department</TableHead>
-                  <TableHead>Password</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -436,39 +385,6 @@ export default function AdminMembers() {
                       </TableCell>
                       <TableCell>{member.department || "-"}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="font-mono text-sm bg-muted/50 px-2 py-1 rounded inline-block min-w-[80px]">
-                            {visiblePasswords[member.id] ? (member.password_plaintext || "N/A") : "••••••••"}
-                          </div>
-                          {member.password_plaintext && (
-                            <div className="flex items-center">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                onClick={() => togglePasswordVisibility(member.id)}
-                                title={visiblePasswords[member.id] ? "Hide password" : "Show password"}
-                              >
-                                {visiblePasswords[member.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                onClick={() => copyToClipboard(member.password_plaintext!, `password-${member.id}`)}
-                                title="Copy password"
-                              >
-                                {copiedField === `password-${member.id}` ? (
-                                  <Check className="w-3.5 h-3.5 text-green-500" />
-                                ) : (
-                                  <Copy className="w-3.5 h-3.5" />
-                                )}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
                         <Select
                           value={roles[member.user_id] || "member"}
                           onValueChange={(value: "admin" | "member") => handleRoleChange(member.user_id, value)}
@@ -490,18 +406,6 @@ export default function AdminMembers() {
                             onClick={() => openEditDialog(member)}
                           >
                             <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setPasswordToReset(member);
-                              setNewPassword("");
-                              setIsPasswordDialogOpen(true);
-                            }}
-                            title="Change Password"
-                          >
-                            <Key className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -533,7 +437,7 @@ export default function AdminMembers() {
                 {createdCredentials ? "Member Created!" : "Create New Member"}
               </DialogTitle>
             </DialogHeader>
-
+            
             {createdCredentials ? (
               <div className="space-y-4 pt-4">
                 <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20">
@@ -541,7 +445,7 @@ export default function AdminMembers() {
                     Share these credentials with the new member:
                   </p>
                 </div>
-
+                
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
                     <div>
@@ -683,16 +587,6 @@ export default function AdminMembers() {
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Profile Photo</label>
-                <FileUpload
-                  value={editFormData.profile_photo_url}
-                  onChange={(url) => setEditFormData({ ...editFormData, profile_photo_url: url })}
-                  bucket="profile-photos"
-                  pathPrefix={editingMember?.user_id}
-                  placeholder="Upload profile photo"
-                />
-              </div>
-              <div>
                 <label className="text-sm font-medium text-muted-foreground">Full Name</label>
                 <Input
                   value={editFormData.full_name}
@@ -738,7 +632,7 @@ export default function AdminMembers() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Member</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete <strong>{memberToDelete?.full_name}</strong>?
+                Are you sure you want to delete <strong>{memberToDelete?.full_name}</strong>? 
                 This action cannot be undone and will permanently remove their account and all associated data.
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -761,67 +655,6 @@ export default function AdminMembers() {
           onOpenChange={setIsImportDialogOpen}
           onSuccess={fetchMembers}
         />
-
-        {/* Password Reset Dialog */}
-        <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Lock className="w-5 h-5 text-accent" />
-                Change Password
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Changing password for <strong>{passwordToReset?.full_name}</strong> ({passwordToReset?.email})
-                </p>
-                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-2">
-                  <Lock className="w-4 h-4" /> New Password
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
-                      let pass = "";
-                      for (let i = 0; i < 12; i++) {
-                        pass += chars.charAt(Math.floor(Math.random() * chars.length));
-                      }
-                      setNewPassword(pass);
-                    }}
-                  >
-                    Generate
-                  </Button>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsPasswordDialogOpen(false)}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="gold"
-                  onClick={handleResetPassword}
-                  disabled={isSubmitting || !newPassword}
-                >
-                  {isSubmitting ? "Updating..." : "Update Password"}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
       </div>
     </DashboardLayout>
   );
