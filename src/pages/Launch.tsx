@@ -155,7 +155,7 @@ export default function Launch() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="min-h-screen bg-background overflow-hidden relative"
       animate={isExiting ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }}
       transition={{ duration: 0.8, ease: "easeInOut" }}
@@ -164,7 +164,7 @@ export default function Launch() {
       <motion.div
         className="absolute inset-0"
         animate={{
-          background: launched 
+          background: launched
             ? `radial-gradient(ellipse at center, hsl(var(--primary) / 0.1) 0%, transparent 70%)`
             : `radial-gradient(ellipse at center, hsl(var(--primary) / 0.05) 0%, transparent 50%)`,
         }}
@@ -172,7 +172,7 @@ export default function Launch() {
       />
 
       {/* Grid pattern overlay */}
-      <div 
+      <div
         className="absolute inset-0 opacity-[0.02]"
         style={{
           backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
@@ -224,8 +224,8 @@ export default function Launch() {
             key="launch"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ 
-              opacity: 0, 
+            exit={{
+              opacity: 0,
               scale: 0.8,
               filter: "blur(20px)",
             }}
@@ -254,7 +254,7 @@ export default function Launch() {
                   }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
-                
+
                 {/* Inner rotating gradient */}
                 <motion.div
                   className="absolute inset-1 rounded-[20px] overflow-hidden"
@@ -262,22 +262,22 @@ export default function Launch() {
                 >
                   <motion.div
                     className="absolute inset-0"
-                    style={{ 
+                    style={{
                       background: `conic-gradient(from 0deg, transparent 0%, hsl(0 0% 100% / 0.3) 25%, transparent 50%)`,
                     }}
                     animate={{ rotate: 360 }}
                     transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                   />
                 </motion.div>
-                
+
                 {/* Logo letter */}
                 <motion.div
                   className="absolute inset-2 rounded-2xl flex items-center justify-center"
                   style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.9) 100%)` }}
                 >
-                  <motion.span 
+                  <motion.span
                     className="text-5xl sm:text-6xl font-bold text-primary-foreground"
-                    animate={{ 
+                    animate={{
                       textShadow: [
                         "0 0 20px hsl(0 0% 100% / 0.5)",
                         "0 0 40px hsl(0 0% 100% / 0.8)",
@@ -297,7 +297,7 @@ export default function Launch() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
               >
-                <motion.h1 
+                <motion.h1
                   className="text-5xl sm:text-7xl font-bold mb-3 tracking-tight"
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -307,7 +307,7 @@ export default function Launch() {
                     AHSAS
                   </span>
                 </motion.h1>
-                <motion.p 
+                <motion.p
                   className="text-muted-foreground text-base sm:text-lg tracking-widest uppercase"
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -335,7 +335,7 @@ export default function Launch() {
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
-              
+
               <Button
                 onClick={handleLaunch}
                 size="lg"
@@ -344,20 +344,20 @@ export default function Launch() {
                 {/* Animated gradient background */}
                 <motion.span
                   className="absolute inset-0"
-                  style={{ 
+                  style={{
                     background: `linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 50%, hsl(var(--primary)) 100%)`,
-                    backgroundSize: "200% 200%" 
+                    backgroundSize: "200% 200%"
                   }}
                   animate={{
                     backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                 />
-                
+
                 {/* Shimmer effect */}
                 <motion.span
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ 
+                  style={{
                     background: `linear-gradient(90deg, transparent 0%, hsl(0 0% 100% / 0.2) 50%, transparent 100%)`,
                   }}
                   animate={{
@@ -365,10 +365,10 @@ export default function Launch() {
                   }}
                   transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 0.5 }}
                 />
-                
+
                 <span className="relative flex items-center gap-3 text-primary-foreground font-semibold">
                   <motion.span
-                    animate={{ 
+                    animate={{
                       rotate: [0, -10, 10, 0],
                       y: [0, -2, 0],
                     }}
@@ -437,10 +437,10 @@ export default function Launch() {
                       className="h-full rounded-full"
                       style={{ background: `linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)` }}
                       initial={{ width: "0%" }}
-                      animate={{ 
+                      animate={{
                         width: index < currentSlide ? "100%" : index === currentSlide ? "100%" : "0%"
                       }}
-                      transition={{ 
+                      transition={{
                         duration: index === currentSlide ? 2.8 : 0.3,
                         ease: index === currentSlide ? "linear" : "easeOut"
                       }}
@@ -459,7 +459,7 @@ export default function Launch() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div 
+              <div
                 className={`absolute inset-0 bg-gradient-radial ${slides[currentSlide].bgGradient}`}
                 style={{
                   background: `radial-gradient(ellipse at center, ${slides[currentSlide].bgGradient.includes('teal') ? 'hsl(180 70% 45% / 0.15)' : slides[currentSlide].bgGradient.includes('amber') ? 'hsl(45 90% 50% / 0.15)' : slides[currentSlide].bgGradient.includes('rose') ? 'hsl(350 80% 50% / 0.15)' : slides[currentSlide].bgGradient.includes('violet') ? 'hsl(270 70% 50% / 0.15)' : 'hsl(var(--primary) / 0.15)'} 0%, transparent 60%)`
@@ -486,23 +486,23 @@ export default function Launch() {
                   {/* Outer ring animation */}
                   <motion.div
                     className="absolute inset-0 rounded-3xl"
-                    style={{ 
+                    style={{
                       background: `linear-gradient(135deg, ${slides[currentSlide].gradient.split(' ')[0].replace('from-', '')} 0%, transparent 100%)`,
                       opacity: 0.2
                     }}
-                    animate={{ 
+                    animate={{
                       scale: [1, 1.2, 1],
                       rotate: [0, 90, 0],
                     }}
                     transition={{ duration: 3, repeat: Infinity }}
                   />
-                  
+
                   {/* Icon background */}
-                  <div 
+                  <div
                     className={`absolute inset-2 rounded-2xl bg-gradient-to-br ${slides[currentSlide].gradient} shadow-2xl flex items-center justify-center`}
                   >
                     <motion.div
-                      animate={{ 
+                      animate={{
                         scale: [1, 1.1, 1],
                       }}
                       transition={{ duration: 2, repeat: Infinity }}
@@ -585,7 +585,7 @@ export default function Launch() {
                       }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
-                    
+
                     <Button
                       onClick={handleEnter}
                       size="lg"
