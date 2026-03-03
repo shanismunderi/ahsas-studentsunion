@@ -17,29 +17,57 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    const { email, new_password } = await req.json();
+    const { email, new_password, user_id } = await req.json();
 
-    if (!email || !new_password) {
+    if (!new_password) {
       return new Response(
-        JSON.stringify({ error: "Email and new_password are required" }),
+        JSON.stringify({ error: "new_password is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Get user by email
-    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (listError) {
-      console.error("Error listing users:", listError);
+    if (!email && !user_id) {
       return new Response(
-        JSON.stringify({ error: "Failed to find user" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "email or user_id is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const user = users.users.find(u => u.email === email);
-    
-    if (!user) {
+    let targetUserId = user_id;
+
+    // If user_id not provided, find by email by paginating through users
+    if (!targetUserId && email) {
+      let page = 1;
+      const perPage = 1000;
+      let found = false;
+      
+      while (!found) {
+        const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+          page,
+          perPage,
+        });
+
+        if (listError) {
+          console.error("Error listing users:", listError);
+          return new Response(
+            JSON.stringify({ error: "Failed to find user" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const user = usersData.users.find(u => u.email === email);
+        if (user) {
+          targetUserId = user.id;
+          found = true;
+        } else if (usersData.users.length < perPage) {
+          break;
+        } else {
+          page++;
+        }
+      }
+    }
+
+    if (!targetUserId) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -48,19 +76,19 @@ Deno.serve(async (req) => {
 
     // Update user password
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      user.id,
+      targetUserId,
       { password: new_password }
     );
 
     if (updateError) {
       console.error("Error updating password:", updateError);
       return new Response(
-        JSON.stringify({ error: "Failed to update password" }),
+        JSON.stringify({ error: "Failed to update password: " + updateError.message }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Password reset successfully for ${email}`);
+    console.log(`Password reset successfully for ${email || targetUserId}`);
     
     return new Response(
       JSON.stringify({ success: true, message: "Password updated successfully" }),
