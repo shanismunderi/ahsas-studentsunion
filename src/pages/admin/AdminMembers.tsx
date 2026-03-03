@@ -46,10 +46,11 @@ interface Member {
   user_id: string;
   full_name: string;
   email: string;
-  phone: string;
-  department: string;
-  member_id: string;
+  phone: string | null;
+  department: string | null;
+  member_id: string | null;
   created_at: string;
+  profile_photo_url: string | null;
 }
 
 interface UserRole {
@@ -85,6 +86,7 @@ export default function AdminMembers() {
 
   const [editFormData, setEditFormData] = useState({
     full_name: "",
+    email: "",
     phone: "",
     department: "",
     member_id: "",
@@ -106,28 +108,38 @@ export default function AdminMembers() {
   };
 
   const fetchMembers = async () => {
-    const { data: membersData } = await supabase
-      .from("profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      const { data: membersData, error: membersError } = await supabase
+        .from("profiles")
+        .select("id, user_id, full_name, email, phone, department, member_id, created_at, profile_photo_url")
+        .order("created_at", { ascending: false });
 
-    const { data: rolesData } = await supabase
-      .from("user_roles")
-      .select("user_id, role");
+      const { data: rolesData, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
 
-    if (membersData) {
-      setMembers(membersData as Member[]);
+      if (membersError) {
+        console.error("Error fetching members:", membersError);
+        toast({ title: "Error loading members", description: membersError.message, variant: "destructive" });
+      }
+
+      if (membersData) {
+        setMembers(membersData as Member[]);
+      }
+
+      if (rolesData) {
+        const rolesMap: Record<string, string> = {};
+        rolesData.forEach((r: UserRole) => {
+          rolesMap[r.user_id] = r.role;
+        });
+        setRoles(rolesMap);
+      }
+    } catch (error: any) {
+      console.error("Error fetching members:", error);
+      toast({ title: "Error loading members", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
-
-    if (rolesData) {
-      const rolesMap: Record<string, string> = {};
-      rolesData.forEach((r: UserRole) => {
-        rolesMap[r.user_id] = r.role;
-      });
-      setRoles(rolesMap);
-    }
-
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -140,15 +152,24 @@ export default function AdminMembers() {
       return;
     }
 
+    if (createFormData.password.length < 6) {
+      toast({ title: "Password must be at least 6 characters", variant: "destructive" });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
+      if (!session?.access_token) {
+        throw new Error("Not authenticated. Please log in again.");
+      }
+
       const response = await supabase.functions.invoke('create-member', {
         body: createFormData,
         headers: {
-          Authorization: `Bearer ${session?.access_token}`
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
@@ -174,21 +195,37 @@ export default function AdminMembers() {
   const handleSaveMember = async () => {
     if (!editingMember) return;
 
-    setIsSubmitting(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update(editFormData)
-      .eq("id", editingMember.id);
-
-    if (error) {
-      toast({ title: "Error updating member", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Member updated successfully" });
-      setIsEditDialogOpen(false);
-      setEditingMember(null);
-      fetchMembers();
+    if (!editFormData.full_name.trim()) {
+      toast({ title: "Full name is required", variant: "destructive" });
+      return;
     }
-    setIsSubmitting(false);
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: editFormData.full_name,
+          email: editFormData.email,
+          phone: editFormData.phone || null,
+          department: editFormData.department || null,
+          member_id: editFormData.member_id || null,
+        })
+        .eq("id", editingMember.id);
+
+      if (error) {
+        toast({ title: "Error updating member", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Member updated successfully" });
+        setIsEditDialogOpen(false);
+        setEditingMember(null);
+        fetchMembers();
+      }
+    } catch (error: any) {
+      toast({ title: "Error updating member", description: error.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteMember = async () => {
@@ -198,10 +235,14 @@ export default function AdminMembers() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
+      if (!session?.access_token) {
+        throw new Error("Not authenticated. Please log in again.");
+      }
+
       const response = await supabase.functions.invoke('delete-member', {
         body: { user_id: memberToDelete.user_id },
         headers: {
-          Authorization: `Bearer ${session?.access_token}`
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
@@ -221,16 +262,20 @@ export default function AdminMembers() {
   };
 
   const handleRoleChange = async (userId: string, newRole: "admin" | "member") => {
-    const { error } = await supabase
-      .from("user_roles")
-      .update({ role: newRole })
-      .eq("user_id", userId);
+    try {
+      const { error } = await supabase
+        .from("user_roles")
+        .update({ role: newRole })
+        .eq("user_id", userId);
 
-    if (error) {
+      if (error) {
+        toast({ title: "Error updating role", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Role updated successfully" });
+        setRoles({ ...roles, [userId]: newRole });
+      }
+    } catch (error: any) {
       toast({ title: "Error updating role", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Role updated successfully" });
-      setRoles({ ...roles, [userId]: newRole });
     }
   };
 
@@ -238,6 +283,7 @@ export default function AdminMembers() {
     setEditingMember(member);
     setEditFormData({
       full_name: member.full_name || "",
+      email: member.email || "",
       phone: member.phone || "",
       department: member.department || "",
       member_id: member.member_id || "",
@@ -255,14 +301,15 @@ export default function AdminMembers() {
       member_id: "",
     });
     setCreatedCredentials(null);
+    setShowPassword(false);
     setIsCreateDialogOpen(false);
   };
 
   const filteredMembers = members.filter(
     (m) =>
-      m.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.member_id?.toLowerCase().includes(searchQuery.toLowerCase())
+      (m.full_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (m.email?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (m.member_id?.toLowerCase() || "").includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -286,7 +333,7 @@ export default function AdminMembers() {
               <FileSpreadsheet className="w-4 h-4 mr-2" />
               Import Excel
             </Button>
-            <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-foreground text-background hover:bg-foreground/90">
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
               <UserPlus className="w-4 h-4 mr-2" />
               Create Member
             </Button>
@@ -321,8 +368,8 @@ export default function AdminMembers() {
           </Card>
           <Card>
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-teal/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-teal" />
+              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                <Users className="w-6 h-6 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">
@@ -348,141 +395,143 @@ export default function AdminMembers() {
         {/* Members Table */}
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Member</TableHead>
-                  <TableHead>Member ID</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      Loading...
-                    </TableCell>
+                    <TableHead>Member</TableHead>
+                    <TableHead>Member ID</TableHead>
+                    <TableHead className="hidden md:table-cell">Department</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ) : filteredMembers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      No members found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredMembers.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-foreground">{member.full_name}</p>
-                          <p className="text-sm text-muted-foreground">{member.email}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{member.member_id || "Not assigned"}</Badge>
-                      </TableCell>
-                      <TableCell>{member.department || "-"}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={roles[member.user_id] || "member"}
-                          onValueChange={(value: "admin" | "member") => handleRoleChange(member.user_id, value)}
-                        >
-                          <SelectTrigger className="w-28">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="member">Member</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openEditDialog(member)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setMemberToDelete(member);
-                              setDeleteConfirmOpen(true);
-                            }}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        Loading...
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : filteredMembers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        {searchQuery ? "No members found matching your search" : "No members yet. Create one to get started."}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredMembers.map((member) => (
+                      <TableRow key={member.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium text-foreground">{member.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{member.email}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{member.member_id || "Not assigned"}</Badge>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">{member.department || "-"}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={roles[member.user_id] || "member"}
+                            onValueChange={(value: "admin" | "member") => handleRoleChange(member.user_id, value)}
+                          >
+                            <SelectTrigger className="w-28">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="member">Member</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(member)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setMemberToDelete(member);
+                                setDeleteConfirmOpen(true);
+                              }}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
 
         {/* Create Member Dialog */}
         <Dialog open={isCreateDialogOpen} onOpenChange={(open) => !open && resetCreateDialog()}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-accent" />
+                <UserPlus className="w-5 h-5 text-primary" />
                 {createdCredentials ? "Member Created!" : "Create New Member"}
               </DialogTitle>
             </DialogHeader>
             
             {createdCredentials ? (
               <div className="space-y-4 pt-4">
-                <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-                  <p className="text-sm text-green-600 dark:text-green-400 font-medium mb-2">
+                <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+                  <p className="text-sm text-primary font-medium mb-2">
                     Share these credentials with the new member:
                   </p>
                 </div>
                 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs text-muted-foreground">Email</p>
-                      <p className="font-medium">{createdCredentials.email}</p>
+                      <p className="font-medium truncate">{createdCredentials.email}</p>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => copyToClipboard(createdCredentials.email, 'email')}
                     >
-                      {copiedField === 'email' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                      {copiedField === 'email' ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
                     </Button>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs text-muted-foreground">Password</p>
-                      <p className="font-medium font-mono">{createdCredentials.password}</p>
+                      <p className="font-medium font-mono truncate">{createdCredentials.password}</p>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => copyToClipboard(createdCredentials.password, 'password')}
                     >
-                      {copiedField === 'password' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                      {copiedField === 'password' ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
                     </Button>
                   </div>
                 </div>
 
-                <Button variant="gold" className="w-full mt-4" onClick={resetCreateDialog}>
+                <Button className="w-full mt-4" onClick={resetCreateDialog}>
                   Done
                 </Button>
               </div>
             ) : (
               <div className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="col-span-1 sm:col-span-2">
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Users className="w-4 h-4" /> Full Name *
                     </label>
@@ -493,7 +542,7 @@ export default function AdminMembers() {
                       className="mt-1"
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-1 sm:col-span-2">
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Mail className="w-4 h-4" /> Email *
                     </label>
@@ -505,7 +554,7 @@ export default function AdminMembers() {
                       className="mt-1"
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-1 sm:col-span-2">
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Lock className="w-4 h-4" /> Password *
                     </label>
@@ -515,7 +564,7 @@ export default function AdminMembers() {
                           type={showPassword ? "text" : "password"}
                           value={createFormData.password}
                           onChange={(e) => setCreateFormData({ ...createFormData, password: e.target.value })}
-                          placeholder="Enter password"
+                          placeholder="Min 6 characters"
                           className="pr-10"
                         />
                         <button
@@ -526,7 +575,7 @@ export default function AdminMembers() {
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
-                      <Button type="button" variant="outline" onClick={generatePassword}>
+                      <Button type="button" variant="outline" onClick={generatePassword} className="shrink-0">
                         Generate
                       </Button>
                     </div>
@@ -553,7 +602,7 @@ export default function AdminMembers() {
                       className="mt-1"
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-1 sm:col-span-2">
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Building className="w-4 h-4" /> Department
                     </label>
@@ -570,7 +619,7 @@ export default function AdminMembers() {
                   <Button variant="outline" onClick={resetCreateDialog} disabled={isSubmitting}>
                     Cancel
                   </Button>
-                  <Button variant="gold" onClick={handleCreateMember} disabled={isSubmitting}>
+                  <Button onClick={handleCreateMember} disabled={isSubmitting}>
                     {isSubmitting ? "Creating..." : "Create Member"}
                   </Button>
                 </div>
@@ -581,44 +630,70 @@ export default function AdminMembers() {
 
         {/* Edit Member Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Member</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-primary" />
+                Edit Member
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Users className="w-4 h-4" /> Full Name *
+                </label>
                 <Input
                   value={editFormData.full_name}
                   onChange={(e) => setEditFormData({ ...editFormData, full_name: e.target.value })}
+                  className="mt-1"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Mail className="w-4 h-4" /> Email
+                </label>
+                <Input
+                  type="email"
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Phone className="w-4 h-4" /> Phone
+                </label>
                 <Input
                   value={editFormData.phone}
                   onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                  className="mt-1"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Department</label>
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Building className="w-4 h-4" /> Department
+                </label>
                 <Input
                   value={editFormData.department}
                   onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
+                  className="mt-1"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Member ID</label>
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <IdCard className="w-4 h-4" /> Member ID
+                </label>
                 <Input
                   value={editFormData.member_id}
                   onChange={(e) => setEditFormData({ ...editFormData, member_id: e.target.value })}
+                  className="mt-1"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isSubmitting}>
                   Cancel
                 </Button>
-                <Button variant="gold" onClick={handleSaveMember} disabled={isSubmitting}>
+                <Button onClick={handleSaveMember} disabled={isSubmitting}>
                   {isSubmitting ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
